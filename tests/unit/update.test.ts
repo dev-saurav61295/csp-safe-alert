@@ -190,6 +190,21 @@ describe('Release 1.1.0 gap regressions', () => {
     expect(result.dismiss).toBe('cancel');
   });
 
+  it('attaches the normal deny handler to a dynamically-created deny button', async () => {
+    const promise = CspAlert.fire({
+      title: 'Dynamic deny',
+      showConfirmButton: true,
+      showDenyButton: false,
+    });
+
+    CspAlert.update({ showDenyButton: true });
+    CspAlert.clickDeny();
+
+    const result = await promise;
+    expect(result.isDenied).toBe(true);
+    expect(result.isDismissed).toBe(false);
+  });
+
   it('moves focus when the focused action button is removed', async () => {
     const promise = CspAlert.fire({
       title: 'Focus update',
