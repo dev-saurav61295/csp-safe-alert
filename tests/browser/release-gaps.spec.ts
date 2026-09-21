@@ -16,7 +16,7 @@ test.describe('Release 1.1.0 gap regressions', () => {
         { title: 'Queue two' },
       ]);
       api.getConfirmButton().click();
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 250));
       api.getConfirmButton().click();
       const queueResult = await queuePromise;
 
