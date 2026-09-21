@@ -4,7 +4,7 @@
 
 - **Package Name**: `csp-safe-alert`
 - **Version**: `1.1.0` (Release Candidate)
-- **Current Status**: **Audit fixes implemented; automated verification complete (81/81 tests passing)**
+- **Current Status**: **Release-gap fixes implemented; final PR CI verification in progress**
 - **Pinned Upstream Baseline**: SweetAlert2 `11.17.2`
 
 ---
@@ -25,7 +25,11 @@
 
 ---
 
-## 3. Pending Manual Checks (Release Gate)
+## 3. Release-gap verification
+
+The five defects from the independent review of commit `813bb612eba31e44631824fed5658d7b882e61e4` were reproduced by source-level inspection and covered by new regression tests. Final execution results for this branch are recorded in `docs/test-results.md` from the GitHub Actions run attached to PR #3.
+
+## 4. Pending Manual Checks (Release Gate)
 Automated accessibility checks passed with 0 axe-core violations. These results do not establish complete WCAG conformance. The following manual checks remain release gates and must be performed on the stated environments:
 - Manual NVDA + supported Windows browser keyboard and announcement verification (Pending)
 - Manual VoiceOver + Safari on macOS keyboard, announcement, focus, and rotor verification (Pending)
