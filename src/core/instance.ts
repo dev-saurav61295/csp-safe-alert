@@ -57,6 +57,8 @@ export class CspAlertInstance {
   private closeTimerId: any = null;
   private currentToken: symbol = Symbol('instance-token');
   private appliedCustomClasses: Partial<CspAlertCustomClass> = {};
+  private addedHeightAutoToDocument = false;
+  private addedHeightAutoToBody = false;
 
   constructor(options: CspAlertOptions) {
     this.options = { ...options };
@@ -94,8 +96,14 @@ export class CspAlertInstance {
       document.body.classList.add('cspa-body-scroll-lock');
     }
     if (this.options.heightAuto !== false) {
-      document.documentElement.classList.add('cspa-height-auto');
-      document.body.classList.add('cspa-height-auto');
+      if (!document.documentElement.classList.contains('cspa-height-auto')) {
+        document.documentElement.classList.add('cspa-height-auto');
+        this.addedHeightAutoToDocument = true;
+      }
+      if (!document.body.classList.contains('cspa-height-auto')) {
+        document.body.classList.add('cspa-height-auto');
+        this.addedHeightAutoToBody = true;
+      }
     }
 
     // Trigger animations and activate features
@@ -1039,8 +1047,8 @@ export class CspAlertInstance {
       const remainingPopups = document.querySelectorAll('.cspa-container:not(.cspa-toast-container)');
       if (remainingPopups.length === 0) {
         document.body.classList.remove('cspa-body-scroll-lock');
-        document.documentElement.classList.remove('cspa-height-auto');
-        document.body.classList.remove('cspa-height-auto');
+        if (this.addedHeightAutoToDocument) document.documentElement.classList.remove('cspa-height-auto');
+        if (this.addedHeightAutoToBody) document.body.classList.remove('cspa-height-auto');
       }
     }
 
