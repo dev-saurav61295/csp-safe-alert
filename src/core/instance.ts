@@ -808,7 +808,10 @@ export class CspAlertInstance {
       const target = this.getCustomClassTarget(key);
       if (!target) continue;
       if (previous[key] && previous[key] !== next[key]) {
-        removeClasses(target, previous[key]!);
+        const removable = previous[key]!
+          .split(/\s+/)
+          .filter((token) => token && !token.startsWith('cspa-'));
+        if (removable.length) removeClasses(target, removable);
       }
       if (next[key]) addClasses(target, next[key]!);
     }
