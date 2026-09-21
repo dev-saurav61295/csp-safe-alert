@@ -2,19 +2,19 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA%20Compliant-green.svg)](https://www.w3.org/TR/WCAG22/)
+[![WCAG 2.2](https://img.shields.io/badge/WCAG-2.2%20AA%20oriented-blue.svg)](https://www.w3.org/TR/WCAG22/)
 [![Strict CSP](https://img.shields.io/badge/CSP-Strict%20Compatible-brightgreen.svg)](https://www.w3.org/TR/CSP3/)
 
 **Accessible alerts and dialogs for strict Content Security Policy environments.**
 
-A production-quality, framework-independent JavaScript / TypeScript popup and toast notification library designed from the ground up for strict Content Security Policy (`style-src 'self'`, `script-src 'self'`, `unsafe-inline`-free) and full WCAG 2.2 AA accessibility.
+A production-quality, framework-independent JavaScript / TypeScript popup and toast notification library designed from the ground up for strict Content Security Policy (`style-src 'self'`, `script-src 'self'`, `unsafe-inline`-free) and a WCAG 2.2 Level AA-oriented accessibility implementation. Automated accessibility checks are provided; complete WCAG conformance remains dependent on host integration and required manual assistive-technology testing.
 
 ---
 
 ## Features
 
 - 🛡️ **Strict Content Security Policy (CSP)**: Zero runtime inline styles (`element.style.*`), zero `<style>` tag injections, zero `unsafe-inline`, zero `unsafe-eval`.
-- ♿ **WCAG 2.2 Level AA Accessible**: Focus trapping, automated initial focus routing, focus restoration upon closing, `aria-modal`, `role="dialog"` vs `role="alertdialog"`, and `aria-live` error announcements.
+- ♿ **WCAG 2.2 Level AA-oriented accessibility**: Focus trapping, automated initial focus routing, focus restoration upon closing, `aria-modal`, `role="dialog"` vs `role="alertdialog"`, and `aria-live` error announcements.
 - ⚡ **Zero Runtime Dependencies**: Ultra-lightweight core with 0 external dependencies.
 - 🎨 **Rich Modern Styling**: External CSS design tokens for Light, Dark, High-Contrast, and Borderless themes, sizing presets, toast layouts, and built-in SVGs without network downloads.
 - 🔄 **Feature Parity with SweetAlert2**: Full support for confirmations, destructive prompts, input controls (13 types), async pre-confirm loaders, validation pipelines, queues, mixins, and wall-clock timers.
