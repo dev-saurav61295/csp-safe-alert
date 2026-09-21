@@ -1,9 +1,11 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const workspace = mkdtempSync(join(tmpdir(), 'cspa-pack-'));
+const outputDir = process.env.CSPA_PACK_OUTPUT_DIR ? resolve(process.env.CSPA_PACK_OUTPUT_DIR) : workspace;
+mkdirSync(outputDir, { recursive: true });
 
 try {
   const packJson = JSON.parse(
@@ -11,7 +13,7 @@ try {
       encoding: 'utf8',
     }),
   );
-  const tarball = join(workspace, packJson[0].filename);
+  const tarball = join(outputDir, packJson[0].filename);
 
   const extractDir = join(workspace, 'package');
   execFileSync('tar', ['-xzf', tarball, '-C', workspace]);
