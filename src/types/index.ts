@@ -55,6 +55,8 @@ export interface CspAlertResult<T = any> {
 export interface CspAlertCustomClass {
   container?: string;
   popup?: string;
+  /** Reserved for compatibility; no standalone header element is rendered by the current DOM architecture. */
+  header?: string;
   title?: string;
   closeButton?: string;
   icon?: string;
