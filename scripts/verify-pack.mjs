@@ -9,7 +9,7 @@ mkdirSync(outputDir, { recursive: true });
 
 try {
   const packJson = JSON.parse(
-    execFileSync('npm', ['pack', '--json', '--pack-destination', workspace], {
+    execFileSync('npm', ['pack', '--json', '--pack-destination', outputDir], {
       encoding: 'utf8',
     }),
   );
