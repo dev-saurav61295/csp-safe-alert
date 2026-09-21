@@ -748,7 +748,7 @@ export class CspAlertInstance {
     if (typeof document === 'undefined' || !wasFocused || !this.popup) return;
 
     const candidate = this.confirmBtn || this.denyBtn || this.cancelBtn || this.renderedInput?.inputElement;
-    if (candidate && candidate !== removed && !('disabled' in candidate && (candidate as HTMLButtonElement).disabled)) {
+    if (candidate && !('disabled' in candidate && (candidate as HTMLButtonElement).disabled)) {
       (candidate as HTMLElement).focus();
       return;
     }
