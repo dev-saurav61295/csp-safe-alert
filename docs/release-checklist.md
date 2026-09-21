@@ -43,4 +43,7 @@
 
 ## 4. Release Authorization Status
 
-- **Status**: **READY FOR AUTHORIZED RELEASE** (All automated gates passed; no unauthorized release performed).
+- **Status**: **NOT YET RELEASE READY**
+- Automated gates are passing, but the required manual accessibility checks remain outstanding.
+- Do not publish `1.0.0` until the pending manual checks are completed and their actual results are recorded in `docs/test-results.md`.
+- The repository branch is prepared for release as `main`; npm publication remains explicitly unauthorized until these gates are cleared.

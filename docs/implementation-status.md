@@ -4,7 +4,7 @@
 
 - **Package Name**: `csp-safe-alert`
 - **Version**: `1.0.0`
-- **Current Status**: **Fully Implemented & Verified**
+- **Current Status**: **Implemented; automated verification complete; manual accessibility gates pending**
 - **Pinned Upstream Baseline**: SweetAlert2 `11.17.2`
 
 ---
@@ -25,7 +25,9 @@
 
 ---
 
-## 3. Pending Manual Checks (Screen Reader Exploratory)
-The following automated accessibility checks passed with 100% score (0 violations in axe-core). As per the brief, formal manual checks across NVDA (Windows) and VoiceOver (macOS / iOS Safari) are documented for host integration testing:
-- Manual VoiceOver rotary landmark navigation test (Pending host environment certification)
-- Manual TalkBack virtual keyboard focus occlusion test (Pending host mobile device matrix)
+## 3. Pending Manual Checks (Release Gate)
+Automated accessibility checks passed with 0 axe-core violations. These results do not establish complete WCAG conformance. The following manual checks remain release gates and must be performed on the stated environments:
+- Manual NVDA + supported Windows browser keyboard and announcement verification (Pending)
+- Manual VoiceOver + Safari on macOS keyboard, announcement, focus, and rotor verification (Pending)
+- Manual VoiceOver + iOS Safari / TalkBack mobile interaction and virtual-keyboard focus verification (Pending)
+- Manual zoom/reflow, forced-colors, reduced-motion, touch/pointer, and mobile virtual-keyboard checks (Pending)
