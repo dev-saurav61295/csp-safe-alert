@@ -47,6 +47,7 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:csp": "playwright test tests/csp",
