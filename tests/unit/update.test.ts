@@ -151,3 +151,134 @@ describe('CspAlert.update() Behavior', () => {
     expect(result.value).toBe('original input');
   });
 });
+
+
+describe('Release 1.1.0 gap regressions', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  afterEach(() => {
+    CspAlert.close();
+  });
+
+  it('dynamically adds and removes action buttons, wires handlers, and preserves loading state', async () => {
+    const promise = CspAlert.fire({
+      title: 'Dynamic actions',
+      showConfirmButton: true,
+    });
+
+    CspAlert.update({ showDenyButton: true, showCancelButton: true });
+    expect(CspAlert.getDenyButton()).not.toBeNull();
+    expect(CspAlert.getCancelButton()).not.toBeNull();
+
+    CspAlert.showLoading();
+    expect(CspAlert.getDenyButton()?.disabled).toBe(true);
+    expect(CspAlert.getCancelButton()?.disabled).toBe(true);
+
+    CspAlert.update({ showConfirmButton: false });
+    expect(CspAlert.getConfirmButton()).toBeNull();
+    expect(CspAlert.isLoading()).toBe(true);
+
+    CspAlert.update({ showDenyButton: false });
+    expect(CspAlert.getDenyButton()).toBeNull();
+
+    CspAlert.hideLoading();
+    CspAlert.clickCancel();
+    const result = await promise;
+    expect(result.isDismissed).toBe(true);
+    expect(result.dismiss).toBe('cancel');
+  });
+
+  it('moves focus when the focused action button is removed', async () => {
+    const promise = CspAlert.fire({
+      title: 'Focus update',
+      showConfirmButton: true,
+      showDenyButton: true,
+      showCancelButton: true,
+    });
+
+    const deny = CspAlert.getDenyButton()!;
+    deny.focus();
+    expect(document.activeElement).toBe(deny);
+
+    CspAlert.update({ showDenyButton: false });
+
+    expect(CspAlert.getDenyButton()).toBeNull();
+    expect(document.activeElement).toBe(CspAlert.getConfirmButton());
+
+    CspAlert.clickConfirm();
+    await promise;
+  });
+
+  it('replaces caller custom classes and supports explicit clearing without removing library classes', async () => {
+    const promise = CspAlert.fire({
+      title: 'Classes',
+      showCancelButton: true,
+      customClass: {
+        popup: 'caller-popup-old',
+        title: 'caller-title-old',
+        confirmButton: 'caller-confirm-old',
+        cancelButton: 'caller-cancel-old',
+      },
+    });
+
+    const popup = CspAlert.getPopup()!;
+    const title = CspAlert.getTitle()!;
+    const confirm = CspAlert.getConfirmButton()!;
+    const cancel = CspAlert.getCancelButton()!;
+
+    expect(popup.classList.contains('caller-popup-old')).toBe(true);
+    expect(title.classList.contains('caller-title-old')).toBe(true);
+    expect(confirm.classList.contains('caller-confirm-old')).toBe(true);
+
+    CspAlert.update({
+      customClass: {
+        popup: 'caller-popup-new',
+        title: 'caller-title-new',
+        confirmButton: 'caller-confirm-new',
+        cancelButton: 'caller-cancel-new',
+      },
+    });
+
+    expect(popup.classList.contains('caller-popup-old')).toBe(false);
+    expect(popup.classList.contains('caller-popup-new')).toBe(true);
+    expect(popup.classList.contains('cspa-popup')).toBe(true);
+    expect(title.classList.contains('caller-title-old')).toBe(false);
+    expect(title.classList.contains('caller-title-new')).toBe(true);
+    expect(confirm.classList.contains('caller-confirm-old')).toBe(false);
+    expect(confirm.classList.contains('caller-confirm-new')).toBe(true);
+    expect(cancel.classList.contains('caller-cancel-old')).toBe(false);
+    expect(cancel.classList.contains('caller-cancel-new')).toBe(true);
+
+    CspAlert.update({ customClass: { popup: '' } });
+    expect(popup.classList.contains('caller-popup-new')).toBe(false);
+    expect(popup.classList.contains('cspa-popup')).toBe(true);
+
+    CspAlert.clickConfirm();
+    await promise;
+  });
+
+  it('applies heightAuto through document classes and leaves deprecated arbitrary styling options inert', async () => {
+    const promise = CspAlert.fire({
+      title: 'CSP styling contract',
+      heightAuto: true,
+      padding: '99px',
+      background: 'rgb(1, 2, 3)',
+      icon: 'info',
+      iconColor: 'rgb(4, 5, 6)',
+    });
+
+    expect(document.documentElement.classList.contains('cspa-height-auto')).toBe(true);
+    expect(document.body.classList.contains('cspa-height-auto')).toBe(true);
+
+    const popup = CspAlert.getPopup()!;
+    expect(popup.getAttribute('style')).toBeNull();
+    expect(popup.classList.contains('cspa-popup')).toBe(true);
+
+    CspAlert.clickConfirm();
+    await promise;
+    expect(document.documentElement.classList.contains('cspa-height-auto')).toBe(false);
+    expect(document.body.classList.contains('cspa-height-auto')).toBe(false);
+  });
+});
