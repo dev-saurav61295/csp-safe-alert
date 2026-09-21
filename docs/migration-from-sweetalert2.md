@@ -40,7 +40,7 @@ In your HTML `<head>` (or main external stylesheet):
 | `html` | `html` (HTMLElement / sanitized string) | If passing an `HTMLElement`, it is adopted cleanly. If passing a raw HTML string, register a sanitizer via `CspAlert.setSanitizer(DOMPurify.sanitize)` or pass plain text. |
 | `icon` | `icon` | Direct match (`success`, `error`, `warning`, `info`, `question`). Built with pure inline SVGs, 0 external network requests. |
 | `width: '600px'` | `width: 'cspa-width-lg'` or `customClass.popup` | **CSP Difference**: Arbitrary inline pixel strings are replaced by preset sizing classes (`cspa-width-sm`, `cspa-width-md`, `cspa-width-lg`, `cspa-width-xl`, `cspa-width-full`) or custom external CSS classes. |
-| `background: '#1e293b'` | `theme: 'dark'` or `customClass.popup` | Use standard themes (`light`, `dark`, `high-contrast`, `borderless`) or external classes. |
+| `background: '#1e293b'` | `theme: 'dark'` or `customClass.popup` | Arbitrary `background` is retained only for source compatibility and ignored. Use standard themes or external CSS classes. |
 | `confirmButtonColor` | `confirmButtonVariant: 'primary'` | Use semantic variants (`primary`, `danger`, `secondary`, `success`, `warning`, `info`) or `customClass.confirmButton`. |
 | `denyButtonColor` | `denyButtonVariant: 'danger'` | Use semantic variants or `customClass.denyButton`. |
 | `cancelButtonColor` | `cancelButtonVariant: 'secondary'` | Use semantic variants or `customClass.cancelButton`. |
@@ -49,13 +49,17 @@ In your HTML `<head>` (or main external stylesheet):
 | `input` | `input` | Direct match (`text`, `email`, `password`, `number`, `tel`, `url`, `search`, `textarea`, `select`, `radio`, `checkbox`, `range`, `file`). |
 | `inputValidator` | `inputValidator` | Direct match (supports sync or async functions). |
 | `beforeConfirm` | `beforeConfirm` | Direct match (supports sync or async promises, with loading spinner and duplicate click prevention). |
-| `customClass` | `customClass` | Direct match. |
+| `customClass` | `customClass` | Live updates replace the caller-supplied class for each updated target; clear with an empty string. Required `cspa-*` classes are preserved. |
 | `mixin` | `mixin` | Direct match. |
-| `queue` | `queue` | Direct match. |
+| `queue` | `queue` | Direct match; browser IIFE exposes it on `CspAlert.queue`. |
 
 ---
 
-## 3. Code Migration Examples
+## 3. CSP Styling Migration Notes
+
+SweetAlert2's arbitrary runtime `padding`, `background`, and `iconColor` values are not accepted as runtime styles by CSP Safe Alert. These options are deprecated and ignored. Move those values into an external stylesheet and reference the stylesheet through `customClass.popup` or `customClass.icon`. `heightAuto` remains supported through CSP-safe document classes.
+
+## 4. Code Migration Examples
 
 ### Example A: Confirmation Modal
 #### SweetAlert2

@@ -61,9 +61,17 @@ Displays or clears an accessible validation error on the active form input and a
 Controls the active wall-clock timer engine.
 
 ### `CspAlert.update(options)`
-Updates options (such as title, body, or buttons) on the currently open dialog.
+Updates supported options on the currently open dialog.
+
+Dynamic `showConfirmButton`, `showDenyButton`, and `showCancelButton` changes add/remove real buttons and attach their normal handlers. If the removed button owns focus, focus moves to another available action/input or the popup. Loading state is preserved, and newly created buttons are disabled while loading.
+
+Supported `customClass` targets are updated in the live DOM. For a target that is present, a new class replaces the caller-supplied class from the previous update while required `cspa-*` classes remain. Clear a target explicitly with an empty string, for example `CspAlert.update({ customClass: { popup: '' } })`.
+
+The strict CSP contract intentionally does not apply arbitrary runtime CSS values. `padding`, `background`, and `iconColor` are deprecated and ignored; use external CSS through `customClass` or built-in theme/variant options. `heightAuto` is supported through external `.cspa-height-auto` classes rather than inline styles.
 
 ### `CspAlert.mixin(presetOptions)`
+
+The generated browser IIFE exposes this method on the `CspAlert` namespace as well as the ESM/CommonJS class. Mixin calls share the same active-instance lifecycle as `CspAlert`.
 Creates a customized, reusable subclass with preset options.
 
 ```typescript
@@ -79,6 +87,10 @@ Toast.fire({ icon: 'success', title: 'Signed in successfully' });
 ```
 
 ### `CspAlert.queue(steps)`
+
+The generated browser IIFE exposes this method on the same `CspAlert` namespace. Queue steps execute through the same underlying active-instance state.
+
+The generated browser IIFE exposes this method on the same `CspAlert` namespace. Queue steps execute through the same underlying active-instance state.
 Runs a sequence of dialogs in succession, halting if the user cancels or dismisses.
 
 ### `CspAlert.setSanitizer(sanitizerFunction)`

@@ -31,7 +31,7 @@ export class CspAlert {
       options.title = titleOrOptions;
       if (typeof textOrHtml === 'string') {
         options.text = textOrHtml;
-      } else if (textOrHtml instanceof HTMLElement) {
+      } else if (typeof HTMLElement !== 'undefined' && textOrHtml instanceof HTMLElement) {
         options.html = textOrHtml;
       }
       if (icon) {
@@ -300,7 +300,7 @@ export class CspAlert {
         if (typeof titleOrOptions === 'string') {
           options.title = titleOrOptions;
           if (typeof textOrHtml === 'string') options.text = textOrHtml;
-          else if (textOrHtml instanceof HTMLElement) options.html = textOrHtml;
+          else if (typeof HTMLElement !== 'undefined' && textOrHtml instanceof HTMLElement) options.html = textOrHtml;
           if (icon) options.icon = icon;
         } else if (titleOrOptions) {
           options = { ...titleOrOptions };

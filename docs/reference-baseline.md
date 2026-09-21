@@ -3,8 +3,9 @@
 ## 1. Pinned Reference Baseline
 
 - **Upstream Package**: `sweetalert2`
-- **Pinned Version**: `11.17.2` (Latest stable v11 baseline)
-- **Reference Commit / Release**: `v11.17.2` (SweetAlert2 GitHub Releases)
+- **Pinned Version**: `11.17.2` (frozen project comparison baseline)
+- **Current Upstream Latest Checked**: `11.26.25` on 2026-09-21; the parity matrix intentionally remains pinned to `11.17.2` so this release-gap audit is reproducible rather than moving with upstream.
+- **Reference Commit / Release**: `v11.17.2` (published 2025-02-16; verified against published package/version listings)
 - **Audit Access Date**: 2026-09-21
 - **Public API Declarations Source**: [sweetalert2.d.ts](https://github.com/sweetalert2/sweetalert2/blob/main/sweetalert2.d.ts)
 - **License**: MIT (SweetAlert2 - Tristan Edwards & Limon Monte)

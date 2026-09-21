@@ -3,6 +3,18 @@
 All notable changes to `csp-safe-alert` are documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Dynamic `CspAlert.update()` now creates/removes confirm, deny, and cancel buttons with real handlers, preserves loading state, clears removed references, and moves focus when a focused button is removed.
+- Live `customClass` updates now replace caller-supplied classes on supported targets while preserving required `cspa-*` classes; empty strings clear a target.
+- `heightAuto` now uses external document classes with ownership-aware cleanup. Arbitrary `padding`, `background`, and `iconColor` runtime styling is explicitly deprecated and ignored under strict CSP.
+- The browser IIFE now exposes `CspAlert.mixin()` and `CspAlert.queue()` on the same namespace as `CspAlert.fire()`.
+- String overloads now guard `HTMLElement` references so `fire('Test')` and `mixin().fire('Test')` work without DOM globals.
+
+### Tests
+- Added regression coverage for dynamic actions, focus during button removal, live custom classes, CSP styling contracts, browser-global mixin/queue bindings, and Node-only string overloads.
+
 ## [1.1.0] - 2026-09-21
 
 ### Added

@@ -55,6 +55,7 @@ export interface CspAlertResult<T = any> {
 export interface CspAlertCustomClass {
   container?: string;
   popup?: string;
+  /** Reserved for compatibility; no standalone header element is rendered by the current DOM architecture. */
   header?: string;
   title?: string;
   closeButton?: string;
@@ -88,8 +89,9 @@ export interface CspAlertOptions<T = any> {
   html?: string | HTMLElement | DocumentFragment;
   icon?: CspAlertIcon;
   /**
-   * Custom CSS class name for icon color.
-   * @deprecated Direct inline CSS color strings (e.g. '#ff0000') cannot be set directly under strict CSP. Use CSS custom properties (e.g. `--cspa-icon-error`, `--cspa-primary`) or `customClass.icon`.
+   * Deprecated under the strict CSP contract. Arbitrary icon colors cannot be applied without runtime inline CSS.
+   * Use an external stylesheet class via `customClass.icon` or the built-in theme tokens instead. This option is retained for source compatibility and is ignored.
+   * @deprecated
    */
   iconColor?: string;
   iconHtml?: string | HTMLElement;
@@ -108,13 +110,15 @@ export interface CspAlertOptions<T = any> {
   grow?: CspAlertGrow;
   width?: string;
   /**
-   * Custom CSS class name for popup padding.
-   * @deprecated Inline style strings (e.g. '20px') cannot be set directly under strict CSP. Use `customClass.popup` or external CSS rules.
+   * Deprecated under the strict CSP contract. The arbitrary SweetAlert2 padding value cannot be applied without runtime inline CSS.
+   * Use an external stylesheet class via `customClass.popup` instead. This option is retained for source compatibility and is ignored.
+   * @deprecated
    */
   padding?: string;
   /**
-   * Custom CSS class name for popup background.
-   * @deprecated Inline color/image strings cannot be set directly under strict CSP. Use `theme`, CSS custom property `--cspa-bg`, or `customClass.popup`.
+   * Deprecated under the strict CSP contract. Arbitrary background values cannot be applied without runtime inline CSS.
+   * Use an external stylesheet class via `customClass.popup` or a theme instead. This option is retained for source compatibility and is ignored.
+   * @deprecated
    */
   background?: string;
   /**
@@ -123,7 +127,8 @@ export interface CspAlertOptions<T = any> {
   backdrop?: boolean | string;
   theme?: CspAlertTheme;
   /**
-   * Sets whether popup height is automatically calculated based on content. Set `false` to apply `cspa-no-height-auto`.
+   * Applies CSP-safe height-auto classes to the document root and body while a modal is open.
+   * Set to false to leave host document height rules untouched.
    */
   heightAuto?: boolean;
 

@@ -2,15 +2,22 @@
 
 ## 1. Summary of Test Execution
 
-| Test Suite | Environment / Engine | Checks Executed | Passed | Failed | Skipped | Status |
-|---|---|---|---|---|---|---|
-| **Unit Tests (`tests/unit/`)** | Node / Happy-DOM / Vitest | 54 tests (9 files) | 54 | 0 | 0 | **PASSED** |
-| **Strict CSP Suite (`tests/csp/`)** | Chromium, Firefox, WebKit (2 tests × 3 browsers) | 6 tests | 6 | 0 | 0 | **PASSED** |
-| **Accessibility Audits (`tests/accessibility/`)** | Axe-core / Chromium, Firefox, WebKit (4 tests × 3 browsers) | 12 tests | 12 | 0 | 0 | **PASSED** |
-| **Browser Interactions (`tests/browser/`)** | Chromium, Firefox, WebKit (6 tests × 3 browsers) | 18 tests | 18 | 0 | 0 | **PASSED** |
-| **Total** | Multi-browser + Node | **90 tests** | **90** | **0** | **0** | **100% PASS** |
+The historical 1.1.0 baseline reported 54 unit tests and 90 automated checks before this review. Those numbers are not reused as evidence for this branch.
 
----
+### PR #3 — latest CI evidence available at documentation update
+
+| Check | Actual result | Evidence |
+|---|---|---|
+| Typecheck | **PASS** | CI run 26 completed `npm run typecheck` successfully |
+| Production build | **PASS** | CI run 26 completed `npm run build` successfully |
+| Unit suite | **PENDING** | CI run 26 was still installing Playwright before reaching `npm test`; an earlier pre-fix run reached 60 unit tests with 1 new focus regression failing, which was corrected afterward |
+| CSP / browser suite | **PENDING** | Not reached by the latest completed CI step |
+| Accessibility / axe suite | **PENDING** | Not reached by the latest completed CI step |
+| Browser interaction suite | **PENDING** | Not reached by the latest completed CI step |
+| Packed npm artifact | **PENDING** | `test:package` is wired into CI but has not yet executed in the latest run |
+| npm 1.1.0 publication check | **PENDING** | `test:package` records registry status when reached; local registry access timed out |
+
+The regression suite itself now contains coverage for dynamic buttons, deny-handler wiring, focused-button removal, live custom classes, heightAuto/styling behavior, browser-global `mixin`/`queue`, and Node-only string overloads.
 
 ## 2. Strict CSP Verification Details
 

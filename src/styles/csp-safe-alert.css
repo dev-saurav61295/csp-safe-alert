@@ -153,6 +153,12 @@
   border: 0 !important;
 }
 
+/* Height Auto compatibility: applies SweetAlert2's html/body height-auto behavior through classes only. */
+html.cspa-height-auto,
+body.cspa-height-auto {
+  height: auto !important;
+}
+
 /* Body Scroll Lock */
 .cspa-body-scroll-lock {
   overflow: hidden !important;

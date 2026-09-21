@@ -19,6 +19,7 @@ A production-quality, framework-independent JavaScript / TypeScript popup and to
 - 🎨 **Rich Modern Styling**: External CSS design tokens for Light, Dark, High-Contrast, and Borderless themes, sizing presets, toast layouts, and built-in SVGs without network downloads.
 - 🔄 **SweetAlert2-Inspired Developer Experience**: Familiar, declarative API with support for confirmations, destructive prompts, input controls (13 types), async pre-confirm loaders, validation pipelines, queues, mixins, and wall-clock timers, designed natively without inline styles.
 - 📦 **Multi-Format Distribution**: Ships ESM, CommonJS, IIFE browser script, static CSS stylesheet, and full TypeScript declarations.
+- 🔧 **Live Updates**: `CspAlert.update()` can add/remove confirm, deny, and cancel buttons, replace supported caller classes, and preserve loading/focus state.
 
 ---
 
@@ -149,6 +150,14 @@ Content-Security-Policy: default-src 'none'; script-src 'self'; script-src-attr 
 
 
 ---
+
+## CSP styling limitations
+
+The default build never writes runtime inline CSS. `heightAuto` is implemented with external `.cspa-height-auto` classes on the document root/body and those classes are removed on teardown. The arbitrary SweetAlert2-style `padding`, `background`, and `iconColor` string options are retained only for source compatibility and are **deprecated/ignored** under the strict CSP contract. Use `customClass.popup`, `customClass.icon`, built-in themes, or consumer-authored external CSS instead.
+
+`customClass` updates are live for supported rendered targets. Updating a target replaces the caller-supplied classes for that target; use an empty string such as `customClass: { popup: '' }` to clear a target. Required `cspa-*` library classes are preserved.
+
+The browser IIFE exposes the same API namespace as the module build, including `CspAlert.fire`, `CspAlert.mixin`, and `CspAlert.queue`.
 
 ## Documentation Links
 
