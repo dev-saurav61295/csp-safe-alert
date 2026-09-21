@@ -55,7 +55,8 @@
     "test:browser": "playwright test tests/browser",
     "test": "npm run test:unit && npm run test:csp && npm run test:a11y && npm run test:browser",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:package": "node scripts/verify-pack.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",
