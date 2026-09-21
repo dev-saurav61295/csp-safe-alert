@@ -41,7 +41,33 @@
 - [x] `examples/index.html` & `examples/examples-app.js` (Strict CSP interactive showcase)
 - [x] `LICENSE` (MIT License)
 
-## 4. Release Authorization Status
+## 4. Release Build & Publication Process
+
+The repository does not commit generated `dist/` artifacts. The package is built automatically by npm immediately before publication through the `prepublishOnly` script.
+
+Before publishing:
+
+1. Complete the manual accessibility gates below and record the actual results in `docs/test-results.md`.
+2. Run the full verification suite locally:
+   ```bash
+   npm ci
+   npm run typecheck
+   npm run build
+   npx playwright install --with-deps
+   npm test
+   ```
+3. Inspect the package contents without publishing:
+   ```bash
+   npm pack --dry-run
+   ```
+   Confirm the tarball contains `dist/`, `README.md`, and `LICENSE`, and does not contain development/test files.
+4. Publish only after all release gates are complete:
+   ```bash
+   npm publish
+   ```
+   `npm publish` invokes `prepublishOnly`, which runs the production build first.
+
+## 5. Release Authorization Status
 
 - **Status**: **NOT YET RELEASE READY**
 - Automated gates are passing, but the required manual accessibility checks remain outstanding.
