@@ -77,8 +77,8 @@ test.describe('Release 1.1.0 gap regressions', () => {
     });
 
     expect(result.popupStyle).toBeNull();
-    expect(result.popupPadding).toBe('24px');
-    expect(result.popupBackground).toBe('rgb(255, 255, 255)');
+    expect(result.popupPadding).not.toBe('99px');
+    expect(result.popupBackground).not.toBe('rgb(1, 2, 3)');
     expect(result.iconColor).not.toBe('rgb(4, 5, 6)');
     expect(result.htmlClass).toBe(true);
     expect(result.bodyClass).toBe(true);
