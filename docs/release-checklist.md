@@ -15,13 +15,13 @@
 
 ## 2. Test Verification Summary
 
-- [x] **Unit Tests**: 54/54 passing across 9 test files (Vitest / Happy-DOM).
-- [x] **Strict CSP HTTP Enforcement**: 6/6 passing in Chromium, Firefox, and WebKit (2 tests × 3 browsers) under `default-src 'none'; script-src 'self'; style-src 'self'; ...`.
-- [x] **Zero CSP Violation Events**: Verified with real `securitypolicyviolation` listeners across dialogs, toasts, inputs, updates, themes, and replacements.
-- [x] **Negative Control CSP Verification**: Verified that forbidden inline styles trigger policy violations.
-- [x] **Automated Accessibility (Axe-core)**: 12/12 passing with 0 WCAG 2.2 AA violations (4 tests × 3 browsers).
-- [x] **Browser Focus, Theme Preferences & Interactions**: 18/18 passing across all major browser engines (6 tests × 3 browsers).
-- [x] **Total Automated Checks**: 90/90 passing (100% pass rate).
+- [ ] **Unit Tests**: Final PR CI result pending; includes new release-gap regressions and a Node-only browser-free overload suite.
+- [ ] **Strict CSP HTTP Enforcement**: Final PR CI result pending in Chromium, Firefox, and WebKit.
+- [ ] **Zero CSP Violation Events**: Final PR CI result pending.
+- [ ] **Negative Control CSP Verification**: Final PR CI result pending.
+- [ ] **Automated Accessibility (Axe-core)**: Final PR CI result pending.
+- [ ] **Browser Focus, Theme Preferences & Interactions**: Final PR CI result pending.
+- [ ] **Total Automated Checks**: Final PR CI result pending.
 
 ## 3. Documentation Deliverables Checklist
 
@@ -71,7 +71,7 @@ Before publishing:
 
 ## 5. Release Authorization Status
 
-- **Proposed Version**: `1.1.0` (Release Candidate prepared)
-- Automated test suites are 100% passing (81/81 tests).
-- Per project instructions, npm publication and tag push are left to the maintainer.
+- **Current package version**: `1.1.0` (unchanged in this branch).
+- Publication status is checked by the packed-artifact verification script; no release/tag/publication action is performed here.
+- Automated and manual release gates must be updated from actual evidence before release.
 
