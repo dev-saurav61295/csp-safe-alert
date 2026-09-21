@@ -3,8 +3,8 @@
  * Handles all 13 standard input types with accessible labelling and validation error management.
  */
 
-import { CspAlertInput, CspAlertOptions } from '../types';
-import { createElement, addClasses, setAttributes, clearChildren } from '../utils/dom';
+import { CspAlertInput, CspAlertOptions } from '../types/index.js';
+import { createElement, addClasses, setAttributes, clearChildren } from '../utils/dom.js';
 
 export interface RenderedInput {
   container: HTMLElement;
@@ -15,7 +15,9 @@ export interface RenderedInput {
   validationMessageEl: HTMLElement;
   showValidationMessage: (msg: string) => void;
   resetValidationMessage: () => void;
+  destroy?: () => void;
 }
+
 
 export function renderInput(options: CspAlertOptions, inputId: string, errorId: string): RenderedInput | null {
   const inputType: CspAlertInput | undefined = options.input;
@@ -243,12 +245,20 @@ export function renderInput(options: CspAlertOptions, inputId: string, errorId: 
   // Append validation message container below input
   container.appendChild(validationMessageEl);
 
+  let isCancelled = false;
+
   // Initial Value handling
   if (options.inputValue !== undefined) {
     if (options.inputValue instanceof Promise) {
-      options.inputValue.then((resolvedVal) => {
-        setValue(resolvedVal);
-      });
+      options.inputValue
+        .then((resolvedVal) => {
+          if (!isCancelled) {
+            setValue(resolvedVal);
+          }
+        })
+        .catch((_err) => {
+          // Prevent unhandled promise rejection if inputValue promise rejects
+        });
     } else {
       setValue(options.inputValue);
     }
@@ -268,6 +278,10 @@ export function renderInput(options: CspAlertOptions, inputId: string, errorId: 
     inputElement.removeAttribute('aria-errormessage');
   };
 
+  const destroy = () => {
+    isCancelled = true;
+  };
+
   return {
     container,
     inputElement,
@@ -277,5 +291,7 @@ export function renderInput(options: CspAlertOptions, inputId: string, errorId: 
     validationMessageEl,
     showValidationMessage,
     resetValidationMessage,
+    destroy,
   };
 }
+

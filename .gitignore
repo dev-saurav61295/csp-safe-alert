@@ -4,6 +4,7 @@ node_modules/
 # Build artifacts
 dist/
 *.tgz
+*.zip
 
 # Test results and coverage
 test-results/

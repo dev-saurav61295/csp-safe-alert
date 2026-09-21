@@ -38,6 +38,40 @@
   --cspa-icon-question: #8b5cf6;
 }
 
+/* Explicit Light Theme (Preserved regardless of system dark-mode preference) */
+.cspa-theme-light {
+  --cspa-bg: #ffffff;
+  --cspa-text: #1e293b;
+  --cspa-title: #0f172a;
+  --cspa-muted: #64748b;
+  --cspa-border: #e2e8f0;
+  --cspa-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --cspa-backdrop-bg: rgba(15, 23, 42, 0.6);
+  --cspa-focus-ring: #2563eb;
+
+  --cspa-primary: #2563eb;
+  --cspa-primary-hover: #1d4ed8;
+  --cspa-primary-text: #ffffff;
+
+  --cspa-danger: #dc2626;
+  --cspa-danger-hover: #b91c1c;
+  --cspa-danger-text: #ffffff;
+
+  --cspa-secondary: #64748b;
+  --cspa-secondary-hover: #475569;
+  --cspa-secondary-text: #ffffff;
+
+  --cspa-success: #16a34a;
+  --cspa-warning: #d97706;
+  --cspa-info: #0284c7;
+
+  --cspa-icon-success: #16a34a;
+  --cspa-icon-error: #dc2626;
+  --cspa-icon-warning: #d97706;
+  --cspa-icon-info: #0284c7;
+  --cspa-icon-question: #8b5cf6;
+}
+
 /* Dark Theme */
 .cspa-theme-dark {
   --cspa-bg: #1e293b;
@@ -58,7 +92,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(.cspa-theme-light) {
+  :root {
     --cspa-bg: #1e293b;
     --cspa-text: #f1f5f9;
     --cspa-title: #ffffff;
@@ -76,6 +110,7 @@
     --cspa-secondary-hover: #334155;
   }
 }
+
 
 /* High Contrast Theme */
 .cspa-theme-high-contrast {
@@ -145,9 +180,15 @@
   transition: opacity 0.2s ease-in-out;
 }
 
+.cspa-backdrop-none,
+.cspa-no-backdrop {
+  background-color: transparent !important;
+}
+
 .cspa-backdrop-show {
   opacity: 1;
 }
+
 
 /* Positions */
 .cspa-pos-center {

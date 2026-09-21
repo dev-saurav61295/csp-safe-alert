@@ -4,26 +4,30 @@
 
 import {
   CspAlertOptions,
+  CspAlertUpdateOptions,
   CspAlertResult,
   DismissReason,
-} from '../types';
+} from '../types/index.js';
 import {
   createElement,
   addClasses,
   removeElement,
   clearChildren,
-} from '../utils/dom';
-import { TimerEngine } from '../utils/timer';
-import { FocusTrap } from '../accessibility/focusTrap';
-import { announce } from '../accessibility/announcer';
+  isHTMLElement,
+  isNode,
+} from '../utils/dom.js';
+import { safeMerge, getSanitizer } from '../utils/security.js';
+import { TimerEngine } from '../utils/timer.js';
+import { FocusTrap } from '../accessibility/focusTrap.js';
+import { announce } from '../accessibility/announcer.js';
 import {
   renderIcon,
   renderImage,
   renderTitle,
   renderHtmlContainer,
   renderFooter,
-} from '../content/contentRenderer';
-import { renderInput, RenderedInput } from '../inputs/inputFactory';
+} from '../content/contentRenderer.js';
+import { renderInput, RenderedInput } from '../inputs/inputFactory.js';
 
 export class CspAlertInstance {
   private options: CspAlertOptions;
@@ -34,18 +38,22 @@ export class CspAlertInstance {
   private container: HTMLElement | null = null;
   private popup: HTMLElement | null = null;
   private renderedInput: RenderedInput | null = null;
+  private validationMessageEl: HTMLElement | null = null;
   private confirmBtn: HTMLButtonElement | null = null;
   private denyBtn: HTMLButtonElement | null = null;
   private cancelBtn: HTMLButtonElement | null = null;
   private closeBtn: HTMLButtonElement | null = null;
   private timerProgressBar: HTMLProgressElement | null = null;
 
-  // Helpers
+  // Helpers & State
   private focusTrap: FocusTrap | null = null;
   private timerEngine: TimerEngine | null = null;
   private isSettled: boolean = false;
   private isDestroyed: boolean = false;
   private loadingState: boolean = false;
+  private isActionInProgress: boolean = false;
+  private rafId: number | null = null;
+  private closeTimerId: any = null;
   private currentToken: symbol = Symbol('instance-token');
 
   constructor(options: CspAlertOptions) {
@@ -59,10 +67,6 @@ export class CspAlertInstance {
     if (typeof document === 'undefined') {
       this.settle({ isConfirmed: false, isDenied: false, isDismissed: true });
       return;
-    }
-
-    if (this.options.willOpen) {
-      // Container will be constructed below
     }
 
     this.buildDOM();
@@ -87,8 +91,11 @@ export class CspAlertInstance {
       document.body.classList.add('cspa-body-scroll-lock');
     }
 
-    // Trigger animations
-    requestAnimationFrame(() => {
+    // Trigger animations and activate features
+    this.rafId = requestAnimationFrame(() => {
+      this.rafId = null;
+      if (this.isSettled || this.isDestroyed) return;
+
       if (this.container && this.popup) {
         this.container.classList.add('cspa-backdrop-show');
         this.popup.classList.add('cspa-popup-show');
@@ -171,6 +178,19 @@ export class CspAlertInstance {
       `cspa-pos-${position}`,
       isToast ? 'cspa-toast-container' : 'cspa-backdrop',
     ]);
+
+    // Backdrop configuration
+    if (this.options.backdrop === false) {
+      addClasses(this.container, 'cspa-backdrop-none');
+    } else if (typeof this.options.backdrop === 'string') {
+      addClasses(this.container, this.options.backdrop);
+    }
+
+    // Theme applied to container for backdrop styling
+    if (this.options.theme && this.options.theme !== 'auto') {
+      addClasses(this.container, `cspa-theme-${this.options.theme}`);
+    }
+
     if (this.options.customClass?.container) {
       addClasses(this.container, this.options.customClass.container);
     }
@@ -201,7 +221,7 @@ export class CspAlertInstance {
       addClasses(this.popup, `cspa-grow-${this.options.grow}`);
     }
 
-    // Themes
+    // Theme applied to popup
     if (this.options.theme && this.options.theme !== 'auto') {
       addClasses(this.popup, `cspa-theme-${this.options.theme}`);
     }
@@ -256,6 +276,15 @@ export class CspAlertInstance {
       if (this.renderedInput) {
         this.popup.appendChild(this.renderedInput.container);
       }
+    } else {
+      // Popup-level validation message element for dialogs without inputs
+      this.validationMessageEl = createElement('div', 'cspa-validation-message');
+      this.validationMessageEl.id = errorId;
+      this.validationMessageEl.setAttribute('aria-live', 'polite');
+      if (this.options.customClass?.validationMessage) {
+        addClasses(this.validationMessageEl, this.options.customClass.validationMessage);
+      }
+      this.popup.appendChild(this.validationMessageEl);
     }
 
     // Action Buttons
@@ -301,12 +330,15 @@ export class CspAlertInstance {
       addClasses(actionsContainer, this.options.customClass.actions);
     }
 
+    const useButtonStyling = this.options.buttonsStyling !== false;
+
     // Confirm Button
     if (showConfirm) {
       const variant = this.options.confirmButtonVariant || 'primary';
+      const classes = useButtonStyling ? ['cspa-btn', `cspa-btn-${variant}`] : [];
       this.confirmBtn = createElement(
         'button',
-        ['cspa-btn', `cspa-btn-${variant}`],
+        classes,
         this.options.confirmButtonText || 'OK'
       ) as HTMLButtonElement;
       this.confirmBtn.type = 'button';
@@ -322,9 +354,10 @@ export class CspAlertInstance {
     // Deny Button
     if (showDeny) {
       const variant = this.options.denyButtonVariant || 'danger';
+      const classes = useButtonStyling ? ['cspa-btn', `cspa-btn-${variant}`] : [];
       this.denyBtn = createElement(
         'button',
-        ['cspa-btn', `cspa-btn-${variant}`],
+        classes,
         this.options.denyButtonText || 'No'
       ) as HTMLButtonElement;
       this.denyBtn.type = 'button';
@@ -340,9 +373,10 @@ export class CspAlertInstance {
     // Cancel Button
     if (showCancel) {
       const variant = this.options.cancelButtonVariant || 'secondary';
+      const classes = useButtonStyling ? ['cspa-btn', `cspa-btn-${variant}`] : [];
       this.cancelBtn = createElement(
         'button',
-        ['cspa-btn', `cspa-btn-${variant}`],
+        classes,
         this.options.cancelButtonText || 'Cancel'
       ) as HTMLButtonElement;
       this.cancelBtn.type = 'button';
@@ -435,7 +469,10 @@ export class CspAlertInstance {
   }
 
   public async handleConfirm(): Promise<void> {
-    if (this.loadingState) return;
+    if (this.isSettled || this.isDestroyed || this.isActionInProgress || this.loadingState) {
+      return;
+    }
+    this.isActionInProgress = true;
     const token = this.currentToken;
 
     let value: any = true;
@@ -444,20 +481,28 @@ export class CspAlertInstance {
     }
 
     // Run Input Validator if present
-    if (this.options.inputValidator && this.renderedInput) {
+    if (this.options.inputValidator) {
       try {
         const errorMsg = await this.options.inputValidator(value);
-        if (token !== this.currentToken) return; // Stale async check
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
 
         if (errorMsg) {
+          this.isActionInProgress = false;
           this.showValidationMessage(typeof errorMsg === 'string' ? errorMsg : 'Invalid input');
           return;
         } else {
           this.resetValidationMessage();
         }
       } catch (err: any) {
-        if (token !== this.currentToken) return;
-        this.showValidationMessage(err?.message || 'Validation error');
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
+        this.isActionInProgress = false;
+        this.showValidationMessage(err?.message || String(err) || 'Validation error');
         return;
       }
     }
@@ -467,18 +512,26 @@ export class CspAlertInstance {
       try {
         this.showLoading();
         const beforeResult = await this.options.beforeConfirm(value);
-        if (token !== this.currentToken) return;
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
 
         if (beforeResult === false) {
           this.hideLoading();
+          this.isActionInProgress = false;
           return;
         }
         if (beforeResult !== undefined) {
           value = beforeResult;
         }
       } catch (err: any) {
-        if (token !== this.currentToken) return;
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
         this.hideLoading();
+        this.isActionInProgress = false;
         if (err) {
           this.showValidationMessage(err.message || String(err));
         }
@@ -486,6 +539,7 @@ export class CspAlertInstance {
       }
     }
 
+    this.isActionInProgress = false;
     this.settle({
       isConfirmed: true,
       isDenied: false,
@@ -495,7 +549,10 @@ export class CspAlertInstance {
   }
 
   public async handleDeny(): Promise<void> {
-    if (this.loadingState) return;
+    if (this.isSettled || this.isDestroyed || this.isActionInProgress || this.loadingState) {
+      return;
+    }
+    this.isActionInProgress = true;
     const token = this.currentToken;
 
     let value: any = false;
@@ -507,18 +564,26 @@ export class CspAlertInstance {
       try {
         this.showLoading();
         const beforeResult = await this.options.beforeDeny(value);
-        if (token !== this.currentToken) return;
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
 
         if (beforeResult === false) {
           this.hideLoading();
+          this.isActionInProgress = false;
           return;
         }
         if (beforeResult !== undefined) {
           value = beforeResult;
         }
       } catch (err: any) {
-        if (token !== this.currentToken) return;
+        if (token !== this.currentToken || this.isSettled || this.isDestroyed) {
+          this.isActionInProgress = false;
+          return;
+        }
         this.hideLoading();
+        this.isActionInProgress = false;
         if (err) {
           this.showValidationMessage(err.message || String(err));
         }
@@ -526,6 +591,7 @@ export class CspAlertInstance {
       }
     }
 
+    this.isActionInProgress = false;
     this.settle({
       isConfirmed: false,
       isDenied: true,
@@ -535,6 +601,8 @@ export class CspAlertInstance {
   }
 
   public dismissWith(reason: DismissReason): void {
+    this.currentToken = Symbol('invalidated');
+    this.isActionInProgress = false;
     this.settle({
       isConfirmed: false,
       isDenied: false,
@@ -547,12 +615,20 @@ export class CspAlertInstance {
     if (this.renderedInput) {
       this.renderedInput.showValidationMessage(message);
     }
+    if (this.validationMessageEl) {
+      this.validationMessageEl.textContent = message;
+      this.validationMessageEl.classList.add('cspa-validation-message-visible');
+    }
     announce(message, 'assertive');
   }
 
   public resetValidationMessage(): void {
     if (this.renderedInput) {
       this.renderedInput.resetValidationMessage();
+    }
+    if (this.validationMessageEl) {
+      this.validationMessageEl.textContent = '';
+      this.validationMessageEl.classList.remove('cspa-validation-message-visible');
     }
   }
 
@@ -584,34 +660,147 @@ export class CspAlertInstance {
     return this.loadingState;
   }
 
-  public update(options: Partial<CspAlertOptions>): void {
-    this.options = { ...this.options, ...options };
-    // Rerender title
-    if (options.title || options.titleText) {
-      const title = this.getTitle();
-      if (title) title.textContent = options.titleText || options.title || '';
+  public update(options: CspAlertUpdateOptions): void {
+    if (this.isSettled || this.isDestroyed || !this.popup) return;
+
+    // Title update
+    if ('title' in options || 'titleText' in options) {
+      const newTitle = options.titleText !== undefined ? options.titleText : options.title;
+      let titleEl = this.getTitle();
+      if (newTitle) {
+        if (!titleEl) {
+          const titleId = `cspa-title-${Math.random().toString(36).substring(2, 9)}`;
+          titleEl = renderTitle({ ...this.options, titleText: newTitle }, titleId);
+          if (titleEl) {
+            const icon = this.popup.querySelector('.cspa-icon');
+            const img = this.popup.querySelector('.cspa-image');
+            const insertBeforeEl = icon?.nextSibling || img?.nextSibling || this.popup.firstChild;
+            this.popup.insertBefore(titleEl, insertBeforeEl);
+            this.popup.setAttribute('aria-labelledby', titleId);
+          }
+        } else {
+          titleEl.textContent = newTitle;
+        }
+      } else if (titleEl) {
+        removeElement(titleEl);
+        this.popup.removeAttribute('aria-labelledby');
+      }
     }
-    // Rerender body
-    if (options.text) {
-      const content = this.getHtmlContainer();
-      if (content) content.textContent = options.text;
+
+    // Text / HTML update
+    if ('text' in options || 'html' in options) {
+      const newHtml = options.html;
+      const newText = options.text;
+      let htmlEl = this.getHtmlContainer();
+      if (newHtml || newText) {
+        if (!htmlEl) {
+          const htmlContainerId = `cspa-html-${Math.random().toString(36).substring(2, 9)}`;
+          htmlEl = renderHtmlContainer({ ...this.options, html: newHtml, text: newText }, htmlContainerId);
+          if (htmlEl) {
+            const title = this.popup.querySelector('.cspa-title');
+            const insertBeforeEl = title?.nextSibling || this.popup.firstChild;
+            this.popup.insertBefore(htmlEl, insertBeforeEl);
+            this.popup.setAttribute('aria-describedby', htmlContainerId);
+          }
+        } else {
+          clearChildren(htmlEl);
+          if (newHtml) {
+            if (isHTMLElement(newHtml) || isNode(newHtml)) {
+              htmlEl.appendChild(newHtml);
+            } else if (typeof newHtml === 'string') {
+              const sanitizer = getSanitizer();
+              if (sanitizer) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(sanitizer(newHtml), 'text/html');
+                while (doc.body.firstChild) {
+                  htmlEl.appendChild(doc.body.firstChild);
+                }
+              } else {
+                htmlEl.textContent = newHtml;
+              }
+            }
+          } else if (newText !== undefined) {
+            htmlEl.textContent = newText;
+          }
+        }
+      } else if (htmlEl) {
+        removeElement(htmlEl);
+        this.popup.removeAttribute('aria-describedby');
+      }
     }
-    // Update buttons
-    if (options.confirmButtonText && this.confirmBtn) {
-      this.confirmBtn.textContent = options.confirmButtonText;
+
+    // Button text updates (preserving loader state)
+    if ('confirmButtonText' in options && this.confirmBtn) {
+      const text = options.confirmButtonText || '';
+      if (this.loadingState) {
+        const loader = this.confirmBtn.querySelector('.cspa-loader');
+        this.confirmBtn.textContent = text;
+        if (loader) {
+          this.confirmBtn.insertBefore(loader, this.confirmBtn.firstChild);
+        }
+      } else {
+        this.confirmBtn.textContent = text;
+      }
     }
-    if (options.cancelButtonText && this.cancelBtn) {
-      this.cancelBtn.textContent = options.cancelButtonText;
+
+    if ('denyButtonText' in options && this.denyBtn) {
+      this.denyBtn.textContent = options.denyButtonText || '';
     }
-    if (options.denyButtonText && this.denyBtn) {
-      this.denyBtn.textContent = options.denyButtonText;
+
+    if ('cancelButtonText' in options && this.cancelBtn) {
+      this.cancelBtn.textContent = options.cancelButtonText || '';
+    }
+
+    // Filter only supported update keys into active instance options
+    const ALLOWED_UPDATE_KEYS: Array<keyof CspAlertUpdateOptions> = [
+      'title',
+      'titleText',
+      'text',
+      'html',
+      'showConfirmButton',
+      'showDenyButton',
+      'showCancelButton',
+      'confirmButtonText',
+      'denyButtonText',
+      'cancelButtonText',
+      'customClass',
+      'didRender',
+    ];
+
+    const safeUpdates: Partial<CspAlertUpdateOptions> = {};
+    for (const key of ALLOWED_UPDATE_KEYS) {
+      if (key in options && (options as any)[key] !== undefined) {
+        (safeUpdates as any)[key] = (options as any)[key];
+      }
+    }
+
+    this.options = safeMerge({}, this.options, safeUpdates);
+
+    if (this.options.didRender && this.popup) {
+      try {
+        this.options.didRender(this.popup);
+      } catch (err) {
+        console.error('Error in didRender hook:', err);
+      }
     }
   }
+
+  private pendingResult: CspAlertResult | null = null;
 
   public settle(result: CspAlertResult): void {
     if (this.isSettled) return;
     this.isSettled = true;
+    this.pendingResult = result;
     this.currentToken = Symbol('invalidated');
+
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+
+    if (this.renderedInput?.destroy) {
+      this.renderedInput.destroy();
+    }
 
     if (this.options.willClose && this.popup) {
       try {
@@ -639,13 +828,12 @@ export class CspAlertInstance {
       const isTestEnv = typeof process !== 'undefined' && process.env && (process.env.NODE_ENV === 'test' || process.env.VITEST);
       const delay = isTestEnv ? 0 : 200;
 
-      setTimeout(() => {
+      this.closeTimerId = setTimeout(() => {
+        this.closeTimerId = null;
         this.destroy();
-        this.resolvePromise(result);
       }, delay);
     } else {
       this.destroy();
-      this.resolvePromise(result);
     }
   }
 
@@ -653,17 +841,55 @@ export class CspAlertInstance {
     if (this.isDestroyed) return;
     this.isDestroyed = true;
 
+    if (!this.isSettled) {
+      this.isSettled = true;
+      this.pendingResult = {
+        isConfirmed: false,
+        isDenied: false,
+        isDismissed: true,
+        dismiss: 'close',
+      };
+    }
+
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+
+    if (this.closeTimerId !== null) {
+      clearTimeout(this.closeTimerId);
+      this.closeTimerId = null;
+    }
+
+    if (this.renderedInput?.destroy) {
+      this.renderedInput.destroy();
+    }
+
+    if (this.timerEngine) {
+      this.timerEngine.destroy();
+      this.timerEngine = null;
+    }
+
+    if (this.focusTrap) {
+      this.focusTrap.deactivate();
+      this.focusTrap = null;
+    }
+
     if (this.container) {
       removeElement(this.container);
       this.container = null;
     }
 
-    // Restore body scroll lock if no other popups exist
+    // Restore body scroll lock only if no other modal popups remain
     if (typeof document !== 'undefined') {
       const remainingPopups = document.querySelectorAll('.cspa-container:not(.cspa-toast-container)');
       if (remainingPopups.length === 0) {
         document.body.classList.remove('cspa-body-scroll-lock');
       }
+    }
+
+    if (this.pendingResult) {
+      this.resolvePromise(this.pendingResult);
     }
 
     if (this.options.didClose) {
@@ -683,6 +909,7 @@ export class CspAlertInstance {
     }
   }
 
+
   // Getters for public methods
   public getPopup(): HTMLElement | null {
     return this.popup;
@@ -693,11 +920,17 @@ export class CspAlertInstance {
   public getHtmlContainer(): HTMLElement | null {
     return this.popup?.querySelector<HTMLElement>('.cspa-html-container') || null;
   }
+  public getIcon(): HTMLElement | null {
+    return this.popup?.querySelector<HTMLElement>('.cspa-icon') || null;
+  }
+  public getImage(): HTMLImageElement | null {
+    return this.popup?.querySelector<HTMLImageElement>('.cspa-image') || null;
+  }
   public getInput(): HTMLElement | null {
     return this.renderedInput?.inputElement || null;
   }
   public getValidationMessage(): HTMLElement | null {
-    return this.renderedInput?.validationMessageEl || null;
+    return this.renderedInput?.validationMessageEl || this.validationMessageEl || null;
   }
   public getConfirmButton(): HTMLButtonElement | null {
     return this.confirmBtn;
@@ -736,3 +969,4 @@ export class CspAlertInstance {
     return this.timerEngine?.increase(n);
   }
 }
+

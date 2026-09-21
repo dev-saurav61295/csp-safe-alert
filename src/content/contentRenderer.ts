@@ -3,9 +3,9 @@
  * Zero inline styles, zero external network downloads.
  */
 
-import { CspAlertIcon, CspAlertOptions } from '../types';
-import { createElement, addClasses, isHTMLElement, isNode, clearChildren } from '../utils/dom';
-import { isSafeUrl, getSanitizer } from '../utils/security';
+import { CspAlertIcon, CspAlertOptions } from '../types/index.js';
+import { createElement, addClasses, isHTMLElement, isNode, clearChildren } from '../utils/dom.js';
+import { isSafeUrl, getSanitizer } from '../utils/security.js';
 
 const ICON_SVGS: Record<CspAlertIcon, string> = {
   success: `

@@ -4,13 +4,14 @@
 
 import {
   CspAlertOptions,
+  CspAlertUpdateOptions,
   CspAlertResult,
   CspAlertIcon,
   SanitizerFunction,
   DismissReason,
-} from '../types';
-import { safeMerge, setSanitizer as setGlobalSanitizer, getSanitizer } from '../utils/security';
-import { CspAlertInstance } from './instance';
+} from '../types/index.js';
+import { safeMerge, setSanitizer as setGlobalSanitizer, getSanitizer } from '../utils/security.js';
+import { CspAlertInstance } from './instance.js';
 
 export class CspAlert {
   private static currentInstance: CspAlertInstance | null = null;
@@ -43,14 +44,17 @@ export class CspAlert {
     // Merge defaults
     const mergedOptions: CspAlertOptions<T> = safeMerge({}, CspAlert.defaultOptions, options);
 
-    // If an instance is already active, close it first cleanly
+    // If an instance is already active, close and destroy it cleanly so it cannot interfere with the new modal
     if (CspAlert.currentInstance) {
-      CspAlert.currentInstance.dismissWith('close');
+      const previous = CspAlert.currentInstance;
+      previous.dismissWith('close');
+      previous.destroy();
     }
 
     const instance = new CspAlertInstance(mergedOptions);
     CspAlert.currentInstance = instance;
     instance.open();
+
 
     return instance.promise.finally(() => {
       if (CspAlert.currentInstance === instance) {
@@ -98,6 +102,20 @@ export class CspAlert {
    */
   public static getHtmlContainer(): HTMLElement | null {
     return CspAlert.currentInstance?.getHtmlContainer() || null;
+  }
+
+  /**
+   * Returns the active icon element.
+   */
+  public static getIcon(): HTMLElement | null {
+    return CspAlert.currentInstance?.getIcon() || null;
+  }
+
+  /**
+   * Returns the active custom image element.
+   */
+  public static getImage(): HTMLImageElement | null {
+    return CspAlert.currentInstance?.getImage() || null;
   }
 
   /**
@@ -255,9 +273,9 @@ export class CspAlert {
   }
 
   /**
-   * Updates options on the currently open dialog.
+   * Updates options of active dialog dynamically.
    */
-  public static update(options: Partial<CspAlertOptions>): void {
+  public static update(options: CspAlertUpdateOptions): void {
     CspAlert.currentInstance?.update(options);
   }
 

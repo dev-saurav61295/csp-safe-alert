@@ -2,7 +2,7 @@
  * Screen Reader Live Region Announcer
  */
 
-import { createElement } from '../utils/dom';
+import { createElement } from '../utils/dom.js';
 
 let politeLiveRegion: HTMLElement | null = null;
 let assertiveLiveRegion: HTMLElement | null = null;

@@ -124,32 +124,47 @@ export class FocusTrap {
   }
 
   private isolateBackground(): void {
-    if (!this.container.parentElement) return;
-    const body = document.body;
-    for (const child of Array.from(body.children)) {
-      if (child instanceof HTMLElement && child !== this.container && !child.contains(this.container)) {
-        const prevInert = Boolean((child as any).inert);
-        const prevAriaHidden = child.getAttribute('aria-hidden');
-        if ('inert' in child) {
-          (child as any).inert = true;
+    if (!this.container || typeof document === 'undefined') return;
+
+    let current: HTMLElement | null = this.container.parentElement;
+    while (current) {
+      for (const child of Array.from(current.children)) {
+        if (
+          child instanceof HTMLElement &&
+          child !== this.container &&
+          !child.contains(this.container)
+        ) {
+          const prevInert = 'inert' in child ? Boolean((child as any).inert) : false;
+          const prevAriaHidden = child.getAttribute('aria-hidden');
+          if ('inert' in child) {
+            (child as any).inert = true;
+          }
+          child.setAttribute('aria-hidden', 'true');
+          this.hiddenSiblings.push({ el: child, prevInert, prevAriaHidden });
         }
-        child.setAttribute('aria-hidden', 'true');
-        this.hiddenSiblings.push({ el: child, prevInert, prevAriaHidden });
       }
+      if (current === document.body) break;
+      current = current.parentElement;
     }
   }
 
   private restoreBackground(): void {
-    for (const { el, prevInert, prevAriaHidden } of this.hiddenSiblings) {
-      if ('inert' in el) {
-        (el as any).inert = prevInert;
-      }
-      if (prevAriaHidden !== null) {
-        el.setAttribute('aria-hidden', prevAriaHidden);
-      } else {
-        el.removeAttribute('aria-hidden');
+    // Restore in reverse order
+    for (let i = this.hiddenSiblings.length - 1; i >= 0; i--) {
+      const item = this.hiddenSiblings[i];
+      if (item) {
+        const { el, prevInert, prevAriaHidden } = item;
+        if ('inert' in el) {
+          (el as any).inert = prevInert;
+        }
+        if (prevAriaHidden !== null) {
+          el.setAttribute('aria-hidden', prevAriaHidden);
+        } else {
+          el.removeAttribute('aria-hidden');
+        }
       }
     }
     this.hiddenSiblings = [];
   }
 }
+

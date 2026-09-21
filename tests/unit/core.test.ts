@@ -138,4 +138,39 @@ describe('CspAlert Core Lifecycle & Results', () => {
     expect(results[0]?.isConfirmed).toBe(true);
     expect(results[1]?.isConfirmed).toBe(true);
   });
+
+  it('shares active instance state between standalone function exports and CspAlert class', async () => {
+    const { fire, close, isVisible, getTitle } = await import('../../src/index.js');
+
+    // 1. Fire via standalone function
+    const promise1 = fire({
+      title: 'Standalone Fire Test',
+    });
+
+    // CspAlert class sees the instance
+    expect(CspAlert.isVisible()).toBe(true);
+    expect(isVisible()).toBe(true);
+    expect(getTitle()?.textContent).toBe('Standalone Fire Test');
+
+    // Close via CspAlert class
+    CspAlert.close();
+    const res1 = await promise1;
+    expect(res1.isDismissed).toBe(true);
+    expect(isVisible()).toBe(false);
+
+    // 2. Fire via CspAlert class
+    const promise2 = CspAlert.fire({
+      title: 'Class Fire Test',
+    });
+
+    // Standalone functions see the instance
+    expect(isVisible()).toBe(true);
+    expect(getTitle()?.textContent).toBe('Class Fire Test');
+
+    // Close via standalone close()
+    close();
+    const res2 = await promise2;
+    expect(res2.isDismissed).toBe(true);
+    expect(CspAlert.isVisible()).toBe(false);
+  });
 });

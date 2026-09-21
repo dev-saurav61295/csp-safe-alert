@@ -88,6 +88,16 @@
     showResult(`Timer Alert: dismiss=${res.dismiss}`);
   });
 
+  document.getElementById('btn-light-theme')?.addEventListener('click', async () => {
+    const res = await CspAlert.fire({
+      title: 'Light Theme Alert',
+      text: 'Rendered with explicit light theme tokens.',
+      icon: 'info',
+      theme: 'light',
+    });
+    showResult(`Light Theme: confirmed=${res.isConfirmed}`);
+  });
+
   document.getElementById('btn-dark-theme')?.addEventListener('click', async () => {
     const res = await CspAlert.fire({
       title: 'Dark Theme Alert',
@@ -119,4 +129,45 @@
     });
     showResult(`Async Loader: ${JSON.stringify(res.value)}`);
   });
+
+  let txAttempts = 0;
+  document.getElementById('btn-tx-error-retry')?.addEventListener('click', async () => {
+    txAttempts = 0;
+    const res = await CspAlert.fire({
+      title: 'Confirm Transfer',
+      text: 'Transfer $250 to Account #8899',
+      showCancelButton: true,
+      confirmButtonText: 'Transfer Now',
+      beforeConfirm: async () => {
+        txAttempts++;
+        if (txAttempts === 1) {
+          throw new Error('Connection timeout. Please retry.');
+        }
+        return { success: true, ref: 'TXN-7788' };
+      },
+    });
+    showResult(`Transaction: ${JSON.stringify(res.value || res.dismiss)}`);
+  });
+
+  document.getElementById('btn-rapid-replace')?.addEventListener('click', async () => {
+    CspAlert.fire({
+      title: 'Initial Replaceable Modal',
+    });
+    // Immediately replace
+    const res = await CspAlert.fire({
+      title: 'Replacement Modal',
+      text: 'Replaced immediately',
+    });
+    showResult(`Replacement: confirmed=${res.isConfirmed}`);
+  });
+
+  document.getElementById('btn-nested-target')?.addEventListener('click', async () => {
+    const res = await CspAlert.fire({
+      title: 'Nested Modal',
+      target: '#nested-modal-container',
+      showCancelButton: true,
+    });
+    showResult(`Nested Target: confirmed=${res.isConfirmed}`);
+  });
 })();
+

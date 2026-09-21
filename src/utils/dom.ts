@@ -2,7 +2,7 @@
  * Safe DOM Utilities - Zero inline styles, fully CSP compliant
  */
 
-import { isAllowedAttribute } from './security';
+import { isAllowedAttribute } from './security.js';
 
 /**
  * Creates an element with optional class names and text content (via textContent, never innerHTML).
@@ -22,16 +22,23 @@ export function createElement<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
+const CLASS_TOKEN_REGEX = /^[a-zA-Z0-9_\-:]+$/;
+
 /**
  * Safely adds class names (supporting strings, space-separated classes, or arrays).
+ * Filters out invalid class tokens (e.g. raw CSS values like '#fff' or '20px') to prevent DOMExceptions.
  */
 export function addClasses(el: Element, classes: string | string[]): void {
   if (!classes) return;
   const list = Array.isArray(classes) ? classes : classes.split(/\s+/);
   for (const c of list) {
     const trimmed = c.trim();
-    if (trimmed) {
-      el.classList.add(trimmed);
+    if (trimmed && CLASS_TOKEN_REGEX.test(trimmed)) {
+      try {
+        el.classList.add(trimmed);
+      } catch {
+        // Safe fallback
+      }
     }
   }
 }
@@ -44,8 +51,12 @@ export function removeClasses(el: Element, classes: string | string[]): void {
   const list = Array.isArray(classes) ? classes : classes.split(/\s+/);
   for (const c of list) {
     const trimmed = c.trim();
-    if (trimmed) {
-      el.classList.remove(trimmed);
+    if (trimmed && CLASS_TOKEN_REGEX.test(trimmed)) {
+      try {
+        el.classList.remove(trimmed);
+      } catch {
+        // Safe fallback
+      }
     }
   }
 }

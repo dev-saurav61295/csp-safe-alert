@@ -2,7 +2,7 @@
  * Security & Sanitization Utilities
  */
 
-import { SanitizerFunction } from '../types';
+import { SanitizerFunction } from '../types/index.js';
 
 let globalSanitizer: SanitizerFunction | null = null;
 
@@ -99,9 +99,34 @@ export function isAllowedAttribute(attrName: string): boolean {
 }
 
 /**
- * Deep merge protecting against prototype pollution
+ * Checks if a value is a plain JavaScript object (Record<string, any>).
+ * Excludes primitives, arrays, null, DOM Nodes, Map, Set, Promise, Date, RegExp, etc.
  */
-export function safeMerge<T extends Record<string, any>>(target: T, ...sources: Array<Record<string, any> | undefined>): T {
+export function isPlainObject(value: any): value is Record<string, any> {
+  if (!value || typeof value !== 'object') return false;
+  if (typeof Node !== 'undefined' && value instanceof Node) return false;
+  if (Array.isArray(value)) return false;
+  if (
+    value instanceof Map ||
+    value instanceof Set ||
+    value instanceof Promise ||
+    value instanceof Date ||
+    value instanceof RegExp
+  ) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+  return proto === null || proto === Object.prototype;
+}
+
+/**
+ * Deep merge protecting against prototype pollution.
+ * Recursively merges only plain objects; preserves non-plain objects, callbacks, and arrays.
+ */
+export function safeMerge<T extends Record<string, any>>(
+  target: T,
+  ...sources: Array<Record<string, any> | undefined>
+): T {
   for (const source of sources) {
     if (!source || typeof source !== 'object') continue;
     for (const key of Object.keys(source)) {
@@ -110,8 +135,8 @@ export function safeMerge<T extends Record<string, any>>(target: T, ...sources: 
       }
       const value = (source as any)[key];
       if (value !== undefined) {
-        if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Node)) {
-          if (!(target as any)[key] || typeof (target as any)[key] !== 'object') {
+        if (isPlainObject(value)) {
+          if (!isPlainObject((target as any)[key])) {
             (target as any)[key] = {};
           }
           safeMerge((target as any)[key], value);
@@ -123,3 +148,4 @@ export function safeMerge<T extends Record<string, any>>(target: T, ...sources: 
   }
   return target;
 }
+

@@ -4,11 +4,11 @@
 
 | Test Suite | Environment / Engine | Checks Executed | Passed | Failed | Skipped | Status |
 |---|---|---|---|---|---|---|
-| **Unit Tests (`tests/unit/`)** | Node / Happy-DOM / Vitest | 16 tests | 16 | 0 | 0 | **PASSED** |
-| **Strict CSP Suite (`tests/csp/`)** | Chromium, Firefox, WebKit | 6 tests | 6 | 0 | 0 | **PASSED** |
-| **Accessibility Audits (`tests/accessibility/`)** | Axe-core / Chromium, Firefox, WebKit | 12 tests | 12 | 0 | 0 | **PASSED** |
-| **Browser Interactions (`tests/browser/`)** | Chromium, Firefox, WebKit | 9 tests | 9 | 0 | 0 | **PASSED** |
-| **Total** | Multi-browser + Node | **43 tests** | **43** | **0** | **0** | **100% PASS** |
+| **Unit Tests (`tests/unit/`)** | Node / Happy-DOM / Vitest | 54 tests (9 files) | 54 | 0 | 0 | **PASSED** |
+| **Strict CSP Suite (`tests/csp/`)** | Chromium, Firefox, WebKit (2 tests × 3 browsers) | 6 tests | 6 | 0 | 0 | **PASSED** |
+| **Accessibility Audits (`tests/accessibility/`)** | Axe-core / Chromium, Firefox, WebKit (4 tests × 3 browsers) | 12 tests | 12 | 0 | 0 | **PASSED** |
+| **Browser Interactions (`tests/browser/`)** | Chromium, Firefox, WebKit (6 tests × 3 browsers) | 18 tests | 18 | 0 | 0 | **PASSED** |
+| **Total** | Multi-browser + Node | **90 tests** | **90** | **0** | **0** | **100% PASS** |
 
 ---
 
@@ -18,13 +18,13 @@
   ```http
   Content-Security-Policy: default-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-attr 'none'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   ```
-- **Violations Captured During Alert Execution**: **0** (Zero `securitypolicyviolation` events)
+- **Violations Captured During Alert Execution**: **0** (Zero `securitypolicyviolation` events across all dialogs, toasts, inputs, themes, and replacement flows)
 - **Inline Style Attributes In DOM**: **0** (Zero elements with `style` attribute or `element.style.*` mutations)
-- **Negative Control**: Intentionally injected inline styles trigger `securitypolicyviolation` on `style-src` as expected, proving enforcement is active.
+- **Negative Control**: Intentionally injected inline styles trigger `securitypolicyviolation` on `style-src` as expected, proving enforcement is active and responsive.
 
 ---
 
-## 3. Automated WCAG 2.2 AA Accessibility Audits
+## 3. Automated WCAG 2.2 AA Accessibility Audits & Assistive Technology
 
 - **Axe-core Tags Evaluated**: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`.
 - **States Verified**:
@@ -33,16 +33,26 @@
   - Complex form input dialogs (text, number, select, radio, checkbox, textarea, file)
   - Live-region validation error message states (`aria-invalid="true"`, `aria-errormessage`)
   - Non-modal toasts (`role="status"` / `role="alert"`)
-  - Dark theme and High Contrast mode
+  - Explicit Light, Dark theme, and High Contrast mode
+- **Manual Assistive Technology Note**: Automated axe-core tests verify structural compliance; full accessibility conformance requires end-to-end screen reader testing in target application contexts.
 
 ---
 
-## 4. Packaging Verification
+## 4. Packaging & Consumer Smoke Verification
 
-- **TypeScript Declarations**: Generated cleanly without errors (`dist/index.d.ts`).
+- **Package Archive**: `csp-safe-alert-1.1.0.tgz`
+- **SHA-256 Checksum**: `13d36b10f76570c4f2eb94299c6f36a3962bdb4c634bdd2a552981664fe515e7`
+- **TypeScript Declarations**: Generated cleanly without errors (`dist/index.d.ts` with explicit `.js` import specifiers compatible with `moduleResolution: "NodeNext"`).
 - **Formats Generated**:
-  - ESM: `dist/index.js` (40.78 kB raw, 9.34 kB gzip)
-  - CommonJS: `dist/index.cjs` (31.07 kB raw, 8.08 kB gzip)
-  - Global Browser Script (IIFE): `dist/csp-safe-alert.global.js` (31.07 kB raw, 8.11 kB gzip)
-  - External CSS: `dist/csp-safe-alert.css` (11.78 kB raw, 2.83 kB gzip)
+  - ESM: `dist/index.js` (49.55 kB raw, 10.90 kB gzip)
+  - CommonJS: `dist/index.cjs` (37.90 kB raw, 9.45 kB gzip)
+  - Global Browser Script (IIFE): `dist/csp-safe-alert.global.js` (37.71 kB raw, 9.48 kB gzip)
+  - External CSS: `dist/csp-safe-alert.css` (12.57 kB raw, 2.85 kB gzip)
 - **Runtime Dependencies**: **0** (Zero runtime dependencies in core package)
+- **Isolated Consumer Smoke Testing**: Verified archive `csp-safe-alert-1.1.0.tgz` in an isolated consumer project across:
+  - TypeScript strict type checking (`tsc --noEmit` and `tsc --outDir` with `moduleResolution: NodeNext`)
+  - ESM `import` statements and top-level named helper exports (`fire`, `close`, `isVisible`, `FocusTrap`)
+  - CommonJS `require()` loading
+  - Global Browser IIFE execution in isolated context
+  - CSS stylesheet static asset resolution
+

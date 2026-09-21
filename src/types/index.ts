@@ -87,6 +87,10 @@ export interface CspAlertOptions<T = any> {
   text?: string;
   html?: string | HTMLElement | DocumentFragment;
   icon?: CspAlertIcon;
+  /**
+   * Custom CSS class name for icon color.
+   * @deprecated Direct inline CSS color strings (e.g. '#ff0000') cannot be set directly under strict CSP. Use CSS custom properties (e.g. `--cspa-icon-error`, `--cspa-primary`) or `customClass.icon`.
+   */
   iconColor?: string;
   iconHtml?: string | HTMLElement;
   footer?: string | HTMLElement;
@@ -103,10 +107,24 @@ export interface CspAlertOptions<T = any> {
   position?: CspAlertPosition;
   grow?: CspAlertGrow;
   width?: string;
+  /**
+   * Custom CSS class name for popup padding.
+   * @deprecated Inline style strings (e.g. '20px') cannot be set directly under strict CSP. Use `customClass.popup` or external CSS rules.
+   */
   padding?: string;
+  /**
+   * Custom CSS class name for popup background.
+   * @deprecated Inline color/image strings cannot be set directly under strict CSP. Use `theme`, CSS custom property `--cspa-bg`, or `customClass.popup`.
+   */
   background?: string;
+  /**
+   * Controls backdrop overlay. Set to `false` to render a transparent backdrop (`cspa-backdrop-none`), or provide a custom CSS class name string.
+   */
   backdrop?: boolean | string;
   theme?: CspAlertTheme;
+  /**
+   * Sets whether popup height is automatically calculated based on content. Set `false` to apply `cspa-no-height-auto`.
+   */
   heightAuto?: boolean;
 
   // Input & Form Controls
@@ -132,12 +150,16 @@ export interface CspAlertOptions<T = any> {
   confirmButtonVariant?: CspAlertButtonVariant;
   denyButtonVariant?: CspAlertButtonVariant;
   cancelButtonVariant?: CspAlertButtonVariant;
+  /**
+   * Whether to apply default `cspa-btn` styling to action buttons. Set to `false` to fully control button appearance via custom classes.
+   */
   buttonsStyling?: boolean;
   reverseButtons?: boolean;
   focusConfirm?: boolean;
   focusDeny?: boolean;
   focusCancel?: boolean;
   returnFocus?: boolean;
+
 
   // Close Button & Dismissal Policies
   showCloseButton?: boolean;
@@ -163,6 +185,21 @@ export interface CspAlertOptions<T = any> {
   willClose?: (popup: HTMLElement) => void;
   didClose?: () => void;
   didDestroy?: () => void;
+}
+
+export interface CspAlertUpdateOptions {
+  title?: string;
+  titleText?: string;
+  text?: string;
+  html?: string | HTMLElement | DocumentFragment;
+  showConfirmButton?: boolean;
+  showDenyButton?: boolean;
+  showCancelButton?: boolean;
+  confirmButtonText?: string;
+  denyButtonText?: string;
+  cancelButtonText?: string;
+  customClass?: CspAlertCustomClass;
+  didRender?: (popup: HTMLElement) => void;
 }
 
 export type SanitizerFunction = (dirtyHtml: string) => string;

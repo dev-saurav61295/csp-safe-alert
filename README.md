@@ -14,10 +14,10 @@ A production-quality, framework-independent JavaScript / TypeScript popup and to
 ## Features
 
 - 🛡️ **Strict Content Security Policy (CSP)**: Zero runtime inline styles (`element.style.*`), zero `<style>` tag injections, zero `unsafe-inline`, zero `unsafe-eval`.
-- ♿ **WCAG 2.2 Level AA-oriented accessibility**: Focus trapping, automated initial focus routing, focus restoration upon closing, `aria-modal`, `role="dialog"` vs `role="alertdialog"`, and `aria-live` error announcements.
+- ♿ **WCAG 2.2 Level AA-oriented accessibility**: Focus trapping, automated initial focus routing, focus restoration upon closing, `aria-modal`, `role="dialog"` vs `role="alertdialog"`, and `aria-live` error announcements. Complete conformance remains dependent on host integration and manual assistive-technology testing.
 - ⚡ **Zero Runtime Dependencies**: Ultra-lightweight core with 0 external dependencies.
 - 🎨 **Rich Modern Styling**: External CSS design tokens for Light, Dark, High-Contrast, and Borderless themes, sizing presets, toast layouts, and built-in SVGs without network downloads.
-- 🔄 **Feature Parity with SweetAlert2**: Full support for confirmations, destructive prompts, input controls (13 types), async pre-confirm loaders, validation pipelines, queues, mixins, and wall-clock timers.
+- 🔄 **SweetAlert2-Inspired Developer Experience**: Familiar, declarative API with support for confirmations, destructive prompts, input controls (13 types), async pre-confirm loaders, validation pipelines, queues, mixins, and wall-clock timers, designed natively without inline styles.
 - 📦 **Multi-Format Distribution**: Ships ESM, CommonJS, IIFE browser script, static CSS stylesheet, and full TypeScript declarations.
 
 ---
@@ -95,6 +95,8 @@ if (result.isConfirmed) {
 ```
 
 ### Async Operations with Loading Spinner
+> **Note:** Performing network requests inside `beforeConfirm` requires an appropriate CSP `connect-src` policy allowing your target API endpoint (e.g., `connect-src 'self' https://api.example.com`). It cannot run under `connect-src 'none'`.
+
 ```typescript
 const result = await CspAlert.fire({
   title: 'Process Transaction',
@@ -103,7 +105,7 @@ const result = await CspAlert.fire({
   beforeConfirm: async () => {
     const response = await fetch('/api/pay', { method: 'POST' });
     if (!response.ok) {
-      throw new Error('Payment processing failed.');
+      throw new Error('Payment processing failed. Please retry.');
     }
     return response.json();
   },
@@ -132,7 +134,7 @@ Toast.fire({
 
 ---
 
-## Content Security Policy (CSP) Guarantee
+## Content Security Policy (CSP) & Trust Boundaries
 
 `csp-safe-alert` is verified against the following strict HTTP response header:
 
@@ -143,6 +145,8 @@ Content-Security-Policy: default-src 'none'; script-src 'self'; script-src-attr 
 - **0 `securitypolicyviolation` events** generated during all modal, toast, and input operations.
 - **0 inline style mutations** (`element.style.*` or `style="..."` attributes) across the entire DOM tree.
 - Built-in SVGs and native `<progress>` elements ensure zero inline styling conflicts.
+- **Trust Boundaries**: Caller-provided text strings are safely escaped via `textContent`. If passing raw HTML strings via `html` or `iconHtml`, register an external sanitizer via `CspAlert.setSanitizer(DOMPurify.sanitize)` to maintain security boundaries. Dynamic caller-supplied DOM nodes and callbacks are executed within the application context.
+
 
 ---
 

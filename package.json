@@ -1,6 +1,6 @@
 {
   "name": "csp-safe-alert",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Accessible alerts and dialogs for strict CSP environments.",
   "author": "CSP Safe Alert Contributors",
   "license": "MIT",

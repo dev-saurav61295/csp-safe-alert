@@ -35,28 +35,60 @@ test.describe('Strict Content Security Policy Verification', () => {
     await page.waitForTimeout(2200);
     await expect(page.locator('.cspa-toast-popup')).not.toBeVisible();
 
-    // 5. Dark Theme
+    // 5. Light Theme
+    await page.click('#btn-light-theme');
+    await expect(page.locator('.cspa-popup.cspa-theme-light')).toBeVisible();
+    await page.click('.cspa-btn-primary');
+    await expect(page.locator('.cspa-popup')).not.toBeVisible();
+
+    // 6. Dark Theme
     await page.click('#btn-dark-theme');
     await expect(page.locator('.cspa-popup.cspa-theme-dark')).toBeVisible();
     await page.click('.cspa-btn-primary');
     await expect(page.locator('.cspa-popup')).not.toBeVisible();
 
-    // 6. High Contrast Theme
+    // 7. High Contrast Theme
     await page.click('#btn-high-contrast');
     await expect(page.locator('.cspa-popup.cspa-theme-high-contrast')).toBeVisible();
     await page.click('.cspa-btn-primary');
     await expect(page.locator('.cspa-popup')).not.toBeVisible();
 
-    // Verify ZERO CSP violation events were captured
+    // 8. Transaction Error & Retry on dialog without inputs
+    await page.click('#btn-tx-error-retry');
+    await expect(page.locator('.cspa-popup')).toBeVisible();
+    await page.click('.cspa-btn-primary');
+    // First attempt fails with visible validation error
+    await expect(page.locator('.cspa-validation-message-visible')).toBeVisible();
+    await expect(page.locator('.cspa-validation-message-visible')).toHaveText('Connection timeout. Please retry.');
+    // Retry immediately succeeds
+    await page.click('.cspa-btn-primary');
+    await expect(page.locator('.cspa-popup')).not.toBeVisible();
+    await expect(page.locator('#result-output')).toContainText('TXN-7788');
+
+    // 9. Rapid Replacement
+    await page.click('#btn-rapid-replace');
+    await expect(page.locator('.cspa-popup')).toBeVisible();
+    await expect(page.locator('.cspa-title')).toHaveText('Replacement Modal');
+    await page.click('.cspa-btn-primary');
+    await expect(page.locator('.cspa-popup')).not.toBeVisible();
+
+    // 10. Nested Target
+    await page.click('#btn-nested-target');
+    await expect(page.locator('#nested-modal-container .cspa-popup')).toBeVisible();
+    await page.click('.cspa-btn-secondary');
+    await expect(page.locator('#nested-modal-container .cspa-popup')).not.toBeVisible();
+
+    // Verify ZERO CSP violation events were captured throughout the suite
     const violations = await page.evaluate(() => (window as any).__cspViolations);
     expect(violations).toEqual([]);
 
-    // Verify ZERO inline style attributes exist in the document
+    // Verify ZERO inline style attributes exist in the entire DOM
     const inlineStyleCount = await page.evaluate(() => {
       return document.querySelectorAll('[style]').length;
     });
     expect(inlineStyleCount).toBe(0);
   });
+
 
   test('negative control fixture detects and catches CSP violations', async ({ page }) => {
     await page.goto('/tests/fixtures/negative-control.html');

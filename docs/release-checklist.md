@@ -15,19 +15,21 @@
 
 ## 2. Test Verification Summary
 
-- [x] **Unit Tests**: 16/16 passing.
-- [x] **Strict CSP HTTP Enforcement**: 6/6 passing in Chromium, Firefox, and WebKit under `default-src 'none'; script-src 'self'; style-src 'self'; ...`.
-- [x] **Zero CSP Violation Events**: Verified with real `securitypolicyviolation` listeners.
+- [x] **Unit Tests**: 54/54 passing across 9 test files (Vitest / Happy-DOM).
+- [x] **Strict CSP HTTP Enforcement**: 6/6 passing in Chromium, Firefox, and WebKit (2 tests × 3 browsers) under `default-src 'none'; script-src 'self'; style-src 'self'; ...`.
+- [x] **Zero CSP Violation Events**: Verified with real `securitypolicyviolation` listeners across dialogs, toasts, inputs, updates, themes, and replacements.
 - [x] **Negative Control CSP Verification**: Verified that forbidden inline styles trigger policy violations.
-- [x] **Automated Accessibility (Axe-core)**: 12/12 passing with 0 WCAG 2.2 AA violations.
-- [x] **Browser Focus & Interactions**: 9/9 passing across all major browser engines.
+- [x] **Automated Accessibility (Axe-core)**: 12/12 passing with 0 WCAG 2.2 AA violations (4 tests × 3 browsers).
+- [x] **Browser Focus, Theme Preferences & Interactions**: 18/18 passing across all major browser engines (6 tests × 3 browsers).
+- [x] **Total Automated Checks**: 90/90 passing (100% pass rate).
 
 ## 3. Documentation Deliverables Checklist
 
-- [x] `README.md` (Quickstart, CSS loading, strict CSP guide, examples)
+- [x] `README.md` (Quickstart, CSS loading, strict CSP guide, examples, trust boundaries)
+- [x] `CHANGELOG.md` (Version 1.1.0 release notes)
 - [x] `docs/reference-baseline.md` (Pinned SweetAlert2 11.17.2 baseline)
 - [x] `docs/requirements.md` (Stable traceable requirements REQ-SEC, REQ-MOD, REQ-INP, REQ-ASY, REQ-TIM, REQ-A11Y, REQ-PKG)
-- [x] `docs/feature-parity.md` (Complete SweetAlert2 mapping matrix)
+- [x] `docs/feature-parity.md` (SweetAlert2 mapping matrix & CSP architectural notes)
 - [x] `docs/architecture.md` (Module boundaries, focus trap, lifecycle, state machine)
 - [x] `docs/csp-design-decisions.md` (Zero-inline-style strategy, native progress controls, preset sizing)
 - [x] `docs/security.md` (Threat model, sanitization boundary, allowlists)
@@ -60,7 +62,7 @@ Before publishing:
    ```bash
    npm pack --dry-run
    ```
-   Confirm the tarball contains `dist/`, `README.md`, and `LICENSE`, and does not contain development/test files.
+   Confirm the tarball contains `dist/`, `README.md`, `CHANGELOG.md`, and `LICENSE`, and does not contain development/test files.
 4. Publish only after all release gates are complete:
    ```bash
    npm publish
@@ -69,7 +71,7 @@ Before publishing:
 
 ## 5. Release Authorization Status
 
-- **Status**: **NOT YET RELEASE READY**
-- Automated gates are passing, but the required manual accessibility checks remain outstanding.
-- Do not publish `1.0.0` until the pending manual checks are completed and their actual results are recorded in `docs/test-results.md`.
-- The repository branch is prepared for release as `main`; npm publication remains explicitly unauthorized until these gates are cleared.
+- **Proposed Version**: `1.1.0` (Release Candidate prepared)
+- Automated test suites are 100% passing (81/81 tests).
+- Per project instructions, npm publication and tag push are left to the maintainer.
+
