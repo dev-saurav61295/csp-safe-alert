@@ -34,3 +34,15 @@ jobs:
 
       - name: Run test suite
         run: npm test
+
+      - name: Verify packed npm artifact
+        env:
+          CSPA_PACK_OUTPUT_DIR: ${{ runner.temp }}/cspa-pack
+        run: npm run test:package
+
+      - name: Upload verified npm tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: csp-safe-alert-npm-tarball
+          path: ${{ runner.temp }}/cspa-pack/*.tgz
+          if-no-files-found: error
