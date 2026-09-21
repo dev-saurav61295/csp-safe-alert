@@ -57,7 +57,23 @@ try {
     throw new Error('Packed global bundle contains a forbidden runtime evaluation/style mutation pattern');
   }
 
+  let npmLatest = null;
+  let npm110Published = false;
+  try {
+    npmLatest = JSON.parse(execFileSync('npm', ['view', 'csp-safe-alert', 'version', '--json'], { encoding: 'utf8' }));
+  } catch {
+    npmLatest = null;
+  }
+  try {
+    const published = execFileSync('npm', ['view', 'csp-safe-alert@1.1.0', 'version', '--json'], { encoding: 'utf8' }).trim();
+    npm110Published = JSON.parse(published) === '1.1.0';
+  } catch {
+    npm110Published = false;
+  }
+
   console.log(JSON.stringify({
+    npmLatest,
+    npm110Published,
     tarball,
     packageFiles: required,
     esm: 'passed',
