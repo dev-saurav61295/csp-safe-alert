@@ -2,7 +2,7 @@
 
 ## 1. Package Review & Hygiene
 
-- [x] **Package Name Checked**: `csp-safe-alert` verified against npm registry (Not found / available).
+- [x] **Package Name Checked**: No exact `csp-safe-alert` package was found in npm search at the time of the release audit.
 - [x] **Zero Runtime Dependencies**: Core library has 0 third-party runtime dependencies.
 - [x] **Bundle Formats Built**:
   - `dist/index.js` (ESM module)
