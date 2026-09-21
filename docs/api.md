@@ -72,8 +72,6 @@ The strict CSP contract intentionally does not apply arbitrary runtime CSS value
 ### `CspAlert.mixin(presetOptions)`
 
 The generated browser IIFE exposes this method on the `CspAlert` namespace as well as the ESM/CommonJS class. Mixin calls share the same active-instance lifecycle as `CspAlert`.
-
-The generated browser IIFE exposes this method on the `CspAlert` namespace as well as the ESM/CommonJS class. Mixin calls share the same active-instance lifecycle as `CspAlert`.
 Creates a customized, reusable subclass with preset options.
 
 ```typescript
