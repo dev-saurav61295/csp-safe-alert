@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -32,6 +32,7 @@ try {
   }
 
   const consumer = join(workspace, 'consumer');
+  mkdirSync(consumer, { recursive: true });
   execFileSync('npm', ['init', '-y'], { cwd: consumer, stdio: 'ignore' });
   execFileSync('npm', ['install', tarball, '--ignore-scripts'], { cwd: consumer, stdio: 'inherit' });
 
