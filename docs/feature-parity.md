@@ -11,7 +11,7 @@ This document provides a comprehensive mapping of every SweetAlert2 (v11.17.2) f
 | PAR-OPT-03 | `text` | Body text | `text: string` | Safe DOM text node | XSS-safe | Implemented |
 | PAR-OPT-04 | `html` | HTML content | `html: string \| HTMLElement \| DocumentFragment` | Safe adoption for Elements; optional sanitizer adapter for strings | Script execution prevented | Safe equivalent |
 | PAR-OPT-05 | `icon` | Icon type | `icon: 'success' \| 'error' \| 'warning' \| 'info' \| 'question'` | Pure SVG/CSS external markup | No remote downloads | Implemented |
-| PAR-OPT-06 | `iconColor` | Inline color for icon | `iconColor: string` / `customClass.icon` | Semantic color classes or custom external class | No inline styles | Safe equivalent |
+| PAR-OPT-06 | `iconColor` | Inline color for icon | `iconColor: string` (deprecated/ignored) / `customClass.icon` | External class or theme token; arbitrary runtime value is intentionally not applied | No inline styles | Safe equivalent |
 | PAR-OPT-07 | `iconHtml` | Custom icon markup | `iconHtml: HTMLElement \| string` | DOM element adoption or safe text | No unescaped injection | Safe equivalent |
 | PAR-OPT-08 | `showConfirmButton` | Toggles confirm button | `showConfirmButton: boolean` | Conditional DOM rendering | Fully accessible | Implemented |
 | PAR-OPT-09 | `showDenyButton` | Toggles deny button | `showDenyButton: boolean` | Conditional DOM rendering | Fully accessible | Implemented |
@@ -41,14 +41,15 @@ This document provides a comprehensive mapping of every SweetAlert2 (v11.17.2) f
 | PAR-OPT-33 | `toast` | Non-modal toast mode | `toast: boolean` | Toast container class & positioning | `role="status"` / `role="alert"` | Implemented |
 | PAR-OPT-34 | `position` | Dialog / toast alignment | `position: CspAlertPosition` | External positioning classes (`cspa-pos-*`) | CSS grid/flex | Implemented |
 | PAR-OPT-35 | `width` | Dialog width | `width: string` / `sizePreset` | Preset classes (`cspa-width-*`) or custom external CSS | Zero inline styling | Safe equivalent |
-| PAR-OPT-36 | `padding` | Dialog padding | `padding: string` / `customClass` | External CSS utility classes | Zero inline styling | Safe equivalent |
-| PAR-OPT-37 | `background` | Dialog background | `theme` / `customClass` | Theme tokens (`cspa-theme-*`) or custom CSS | Zero inline styling | Safe equivalent |
+| PAR-OPT-36 | `padding` | Dialog padding | `padding: string` (deprecated/ignored) / `customClass` | Consumer-authored external CSS class | Zero inline styling | Safe equivalent |
+| PAR-OPT-37 | `background` | Dialog background | `background: string` (deprecated/ignored) / `theme` / `customClass` | Theme tokens or consumer-authored external CSS class | Zero inline styling | Safe equivalent |
 | PAR-OPT-38 | `backdrop` | Backdrop visibility / style | `backdrop: boolean \| string` | Static backdrop element + class | Fully accessible | Implemented |
 | PAR-OPT-39 | `allowOutsideClick` | Dismiss on backdrop click | `allowOutsideClick: boolean \| (() => boolean)` | Event listener on container | Safe dismissal | Implemented |
 | PAR-OPT-40 | `allowEscapeKey` | Dismiss on Escape key | `allowEscapeKey: boolean \| (() => boolean)` | Keydown handler (with IME check) | Safe dismissal | Implemented |
 | PAR-OPT-41 | `showCloseButton` | Shows top-right 'X' button | `showCloseButton: boolean` | Accessible button with SVG icon | `aria-label="Close dialog"` | Implemented |
-| PAR-OPT-42 | `customClass` | Custom class overrides | `customClass: Record<string, string>` | Appends class names safely | Full customizability | Implemented |
+| PAR-OPT-42 | `customClass` | Custom class overrides | `customClass: Record<string, string>` | Live target replacement; empty string clears; required `cspa-*` classes are preserved | External CSS only | Verified |
 | PAR-OPT-43 | `beforeConfirm` | Async pre-confirm action | `beforeConfirm: (val) => any \| Promise<any>` | Loading spinner + abort handling | Duplicate submission locked | Implemented |
+| PAR-OPT-48 | `heightAuto` | Applies `height:auto !important` to document root/body | `heightAuto?: boolean` | External `.cspa-height-auto` classes with ownership-aware cleanup | No inline styles; host classes are restored | Verified |
 | PAR-OPT-44 | `beforeDeny` | Async pre-deny action | `beforeDeny: (val) => any \| Promise<any>` | Loading spinner + abort handling | Duplicate submission locked | Implemented |
 | PAR-OPT-45 | `returnFocus` | Restore focus on close | `returnFocus: boolean` | Focus manager stores & restores `activeElement` | Safe focus fallback | Implemented |
 | PAR-OPT-46 | `didOpen` / `willOpen` | Open lifecycle hooks | `didOpen`, `willOpen` | Invoked cleanly during transition | Safe callback boundary | Implemented |
