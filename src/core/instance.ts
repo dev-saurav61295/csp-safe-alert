@@ -744,8 +744,8 @@ export class CspAlertInstance {
     return actions;
   }
 
-  private focusAfterButtonRemoval(removed: HTMLButtonElement): void {
-    if (typeof document === 'undefined' || document.activeElement !== removed || !this.popup) return;
+  private focusAfterButtonRemoval(wasFocused: boolean): void {
+    if (typeof document === 'undefined' || !wasFocused || !this.popup) return;
 
     const candidate = this.confirmBtn || this.denyBtn || this.cancelBtn || this.renderedInput?.inputElement;
     if (candidate && candidate !== removed && !('disabled' in candidate && (candidate as HTMLButtonElement).disabled)) {
@@ -765,7 +765,7 @@ export class CspAlertInstance {
     else this.cancelBtn = null;
 
     removeElement(button);
-    if (wasFocused) this.focusAfterButtonRemoval(button);
+    if (wasFocused) this.focusAfterButtonRemoval(true);
   }
 
   private updateActionButtons(): void {
