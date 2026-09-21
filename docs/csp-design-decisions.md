@@ -30,7 +30,12 @@ To achieve complete visual customization and functional parity without violating
 - `csp-safe-alert` uses a static CSS class `cspa-body-scroll-lock` with `overflow: hidden; scrollbar-gutter: stable both-edges;` to prevent layout shifts without touching `style.paddingRight`.
 
 ### 2.4 Custom Classes (`customClass`)
-- Full support for `customClass: { popup, title, confirmButton, ... }` allowing host applications to apply their own external stylesheet rules seamlessly.
+- Supported rendered targets use caller-authored external CSS classes.
+- Live `update({ customClass })` replaces the caller-supplied class for a target and preserves required `cspa-*` classes. An empty string clears that target.
+
+### 2.5 Styling options that cannot be represented safely at runtime
+- `heightAuto` is implemented with external `.cspa-height-auto` classes on `html` and `body`; no inline style mutation is required.
+- Arbitrary `padding`, `background`, and `iconColor` values are retained only for source compatibility and are deprecated/ignored. Exact runtime values would require inline CSS or generated runtime styles, which are outside the default CSP architecture. Migrate these to `customClass`, external CSS, themes, or semantic variants.
 
 ## 3. Strict CSP Policy Test Fixture
 
