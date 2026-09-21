@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strict CSP Test Fixture</title>
+  <link rel="stylesheet" href="/dist/csp-safe-alert.css">
+</head>
+<body>
+  <header>
+    <h1>CSP Safe Alert - Test Fixture</h1>
+  </header>
+  <main>
+    <div id="controls">
+      <button type="button" id="btn-basic-alert">Basic Alert</button>
+      <button type="button" id="btn-confirm-dialog">Confirm Dialog</button>
+      <button type="button" id="btn-input-prompt">Input Prompt</button>
+      <button type="button" id="btn-validation-prompt">Validation Prompt</button>
+      <button type="button" id="btn-toast">Toast Notification</button>
+      <button type="button" id="btn-timer">Timer Alert</button>
+      <button type="button" id="btn-dark-theme">Dark Theme Alert</button>
+      <button type="button" id="btn-high-contrast">High Contrast Alert</button>
+      <button type="button" id="btn-async-loader">Async Loader</button>
+    </div>
+    <div id="result-output" aria-live="polite"></div>
+  </main>
+
+  <script src="/dist/csp-safe-alert.global.js"></script>
+  <script src="/tests/fixtures/fixture-app.js"></script>
+</body>
+</html>

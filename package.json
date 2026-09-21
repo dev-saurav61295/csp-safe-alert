@@ -1,0 +1,68 @@
+{
+  "name": "csp-safe-alert",
+  "version": "1.0.0",
+  "description": "Accessible alerts and dialogs for strict CSP environments.",
+  "author": "CSP Safe Alert Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dev-saurav61295/csp-safe-alert.git"
+  },
+  "keywords": [
+    "alert",
+    "dialog",
+    "popup",
+    "sweetalert2",
+    "csp",
+    "content-security-policy",
+    "accessibility",
+    "wcag",
+    "a11y",
+    "typescript",
+    "strict-csp",
+    "toast"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./csp-safe-alert.css": "./dist/csp-safe-alert.css",
+    "./styles.css": "./dist/csp-safe-alert.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css",
+    "dist/*.css"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:csp": "playwright test tests/csp",
+    "test:a11y": "playwright test tests/accessibility",
+    "test:browser": "playwright test tests/browser",
+    "test": "npm run test:unit && npm run test:csp && npm run test:a11y && npm run test:browser",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.5",
+    "happy-dom": "^17.1.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.6"
+  }
+}

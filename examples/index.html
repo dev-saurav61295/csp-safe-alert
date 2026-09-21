@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSP Safe Alert — Interactive Showcase</title>
+  <link rel="stylesheet" href="/dist/csp-safe-alert.css">
+  <style>
+    /* Demo page styling (external file or authorized stylesheet) */
+  </style>
+</head>
+<body class="demo-body">
+  <main class="demo-container">
+    <header class="demo-header">
+      <h1>CSP Safe Alert</h1>
+      <p class="tagline">Accessible alerts and dialogs for strict CSP environments.</p>
+    </header>
+
+    <section class="demo-section">
+      <h2>1. Basic Alerts & Confirmations</h2>
+      <div class="demo-button-grid">
+        <button type="button" class="demo-btn" id="demo-basic-success">Success Alert</button>
+        <button type="button" class="demo-btn" id="demo-basic-error">Error Alert</button>
+        <button type="button" class="demo-btn" id="demo-basic-warning">Warning Confirmation</button>
+        <button type="button" class="demo-btn" id="demo-basic-info">Information Modal</button>
+        <button type="button" class="demo-btn" id="demo-basic-question">Question Prompt</button>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h2>2. Interactive Form Inputs & Validation</h2>
+      <div class="demo-button-grid">
+        <button type="button" class="demo-btn" id="demo-input-text">Text Input with Validation</button>
+        <button type="button" class="demo-btn" id="demo-input-select">Select Dropdown</button>
+        <button type="button" class="demo-btn" id="demo-input-radio">Radio Group</button>
+        <button type="button" class="demo-btn" id="demo-input-textarea">Multiline Textarea</button>
+        <button type="button" class="demo-btn" id="demo-input-file">File Attachment</button>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h2>3. Async Operations & Timers</h2>
+      <div class="demo-button-grid">
+        <button type="button" class="demo-btn" id="demo-async-loader">Async API Request</button>
+        <button type="button" class="demo-btn" id="demo-timer-progress">Auto-closing Timer (3s)</button>
+        <button type="button" class="demo-btn" id="demo-multi-step">Multi-Step Modal Queue</button>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h2>4. Non-Modal Toasts & Themes</h2>
+      <div class="demo-button-grid">
+        <button type="button" class="demo-btn" id="demo-toast-success">Top-Right Toast</button>
+        <button type="button" class="demo-btn" id="demo-toast-bottom">Bottom-Start Toast</button>
+        <button type="button" class="demo-btn" id="demo-theme-dark">Dark Theme Alert</button>
+        <button type="button" class="demo-btn" id="demo-theme-contrast">High Contrast Mode</button>
+      </div>
+    </section>
+
+    <section class="demo-result-section">
+      <h3>Last Action Result:</h3>
+      <pre id="demo-result-box" class="demo-result-box">No action triggered yet.</pre>
+    </section>
+  </main>
+
+  <script src="/dist/csp-safe-alert.global.js"></script>
+  <script src="/examples/examples-app.js"></script>
+</body>
+</html>
