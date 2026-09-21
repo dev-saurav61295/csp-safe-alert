@@ -125,7 +125,8 @@ export interface CspAlertOptions<T = any> {
   backdrop?: boolean | string;
   theme?: CspAlertTheme;
   /**
-   * Sets whether popup height is automatically calculated based on content. Set `false` to apply `cspa-no-height-auto`.
+   * Applies CSP-safe height-auto classes to the document root and body while a modal is open.
+   * Set to false to leave host document height rules untouched.
    */
   heightAuto?: boolean;
 
