@@ -4,40 +4,38 @@ test.describe('Release 1.1.0 gap regressions', () => {
   test('browser IIFE exposes mixin and queue on the same CspAlert namespace', async ({ page }) => {
     await page.goto('/tests/fixtures/index.html');
 
-    const result = await page.evaluate(async () => {
+    const namespace = await page.evaluate(() => {
       const api = (window as any).CspAlert;
       const mixin = api.mixin({ toast: true, showConfirmButton: true });
-      const mixinPromise = mixin.fire({ title: 'Mixin works' });
-      api.getConfirmButton().click();
-      const mixinResult = await mixinPromise;
-
-      const queuePromise = api.queue([
-        { title: 'Queue one' },
-        { title: 'Queue two' },
-      ]);
-      api.getConfirmButton().click();
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      api.getConfirmButton().click();
-      const queueResult = await queuePromise;
-
+      (window as any).__mixinPromise = mixin.fire({ title: 'Mixin works' });
       return {
         hasFire: typeof api.fire === 'function',
         hasMixin: typeof api.mixin === 'function',
         hasQueue: typeof api.queue === 'function',
-        mixinConfirmed: mixinResult.isConfirmed,
-        queueConfirmed: queueResult.every((item: any) => item.isConfirmed),
-        sharedState: api.isVisible(),
       };
     });
 
-    expect(result).toEqual({
-      hasFire: true,
-      hasMixin: true,
-      hasQueue: true,
-      mixinConfirmed: true,
-      queueConfirmed: true,
-      sharedState: false,
+    expect(namespace).toEqual({ hasFire: true, hasMixin: true, hasQueue: true });
+
+    await page.locator('.cspa-btn-primary').click();
+    const mixinResult = await page.evaluate(() => (window as any).__mixinPromise);
+    expect(mixinResult.isConfirmed).toBe(true);
+
+    await page.evaluate(() => {
+      (window as any).__queuePromise = (window as any).CspAlert.queue([
+        { title: 'Queue one' },
+        { title: 'Queue two' },
+      ]);
     });
+
+    await page.waitForFunction(() => document.querySelector('.cspa-title')?.textContent === 'Queue one');
+    await page.locator('.cspa-btn-primary').click();
+    await page.waitForFunction(() => document.querySelector('.cspa-title')?.textContent === 'Queue two');
+    await page.locator('.cspa-btn-primary').click();
+
+    const queueResult = await page.evaluate(() => (window as any).__queuePromise);
+    expect(queueResult.every((item: any) => item.isConfirmed)).toBe(true);
+    expect(await page.evaluate(() => (window as any).CspAlert.isVisible())).toBe(false);
   });
 
   test('heightAuto is enforced through external CSS while deprecated arbitrary styling values are ignored', async ({ page }) => {
