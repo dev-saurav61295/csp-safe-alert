@@ -72,6 +72,8 @@ The strict CSP contract intentionally does not apply arbitrary runtime CSS value
 ### `CspAlert.mixin(presetOptions)`
 
 The generated browser IIFE exposes this method on the `CspAlert` namespace as well as the ESM/CommonJS class. Mixin calls share the same active-instance lifecycle as `CspAlert`.
+
+The generated browser IIFE exposes this method on the `CspAlert` namespace as well as the ESM/CommonJS class. Mixin calls share the same active-instance lifecycle as `CspAlert`.
 Creates a customized, reusable subclass with preset options.
 
 ```typescript
@@ -87,6 +89,8 @@ Toast.fire({ icon: 'success', title: 'Signed in successfully' });
 ```
 
 ### `CspAlert.queue(steps)`
+
+The generated browser IIFE exposes this method on the same `CspAlert` namespace. Queue steps execute through the same underlying active-instance state.
 
 The generated browser IIFE exposes this method on the same `CspAlert` namespace. Queue steps execute through the same underlying active-instance state.
 Runs a sequence of dialogs in succession, halting if the user cancels or dismisses.
