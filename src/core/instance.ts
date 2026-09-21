@@ -12,6 +12,7 @@ import {
 import {
   createElement,
   addClasses,
+  removeClasses,
   removeElement,
   clearChildren,
   isHTMLElement,
