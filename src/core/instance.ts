@@ -6,6 +6,7 @@ import {
   CspAlertOptions,
   CspAlertUpdateOptions,
   CspAlertResult,
+  CspAlertCustomClass,
   DismissReason,
 } from '../types/index.js';
 import {
@@ -55,9 +56,11 @@ export class CspAlertInstance {
   private rafId: number | null = null;
   private closeTimerId: any = null;
   private currentToken: symbol = Symbol('instance-token');
+  private appliedCustomClasses: Partial<CspAlertCustomClass> = {};
 
   constructor(options: CspAlertOptions) {
     this.options = { ...options };
+    this.appliedCustomClasses = { ...(options.customClass || {}) };
     this.promise = new Promise<CspAlertResult>((resolve) => {
       this.resolvePromise = resolve;
     });
@@ -89,6 +92,10 @@ export class CspAlertInstance {
     // Scroll lock for modal mode
     if (!this.options.toast) {
       document.body.classList.add('cspa-body-scroll-lock');
+    }
+    if (this.options.heightAuto !== false) {
+      document.documentElement.classList.add('cspa-height-auto');
+      document.body.classList.add('cspa-height-auto');
     }
 
     // Trigger animations and activate features
@@ -638,6 +645,7 @@ export class CspAlertInstance {
       this.confirmBtn.disabled = true;
       if (!this.confirmBtn.querySelector('.cspa-loader')) {
         const loader = createElement('span', 'cspa-loader');
+        if (this.options.customClass?.loader) addClasses(loader, this.options.customClass.loader);
         this.confirmBtn.insertBefore(loader, this.confirmBtn.firstChild);
       }
     }
@@ -660,10 +668,159 @@ export class CspAlertInstance {
     return this.loadingState;
   }
 
+  private createActionButton(kind: 'confirm' | 'deny' | 'cancel'): HTMLButtonElement {
+    const text = kind === 'confirm'
+      ? this.options.confirmButtonText || 'OK'
+      : kind === 'deny'
+        ? this.options.denyButtonText || 'No'
+        : this.options.cancelButtonText || 'Cancel';
+    const variant = kind === 'confirm'
+      ? this.options.confirmButtonVariant || 'primary'
+      : kind === 'deny'
+        ? this.options.denyButtonVariant || 'danger'
+        : this.options.cancelButtonVariant || 'secondary';
+    const customClassKey = kind === 'confirm'
+      ? 'confirmButton'
+      : kind === 'deny'
+        ? 'denyButton'
+        : 'cancelButton';
+    const ariaLabel = kind === 'confirm'
+      ? this.options.confirmButtonAriaLabel
+      : kind === 'deny'
+        ? this.options.denyButtonAriaLabel
+        : this.options.cancelButtonAriaLabel;
+
+    const classes = this.options.buttonsStyling !== false ? ['cspa-btn', `cspa-btn-${variant}`] : [];
+    const button = createElement('button', classes, text) as HTMLButtonElement;
+    button.type = 'button';
+    if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
+    const customClass = this.options.customClass?.[customClassKey];
+    if (customClass) addClasses(button, customClass);
+
+    if (this.loadingState) {
+      button.disabled = true;
+    }
+
+    if (kind === 'confirm') {
+      this.confirmBtn = button;
+      button.addEventListener('click', () => this.handleConfirm());
+      if (this.loadingState) {
+        const loader = createElement('span', 'cspa-loader');
+        if (this.options.customClass?.loader) addClasses(loader, this.options.customClass.loader);
+        button.insertBefore(loader, button.firstChild);
+      }
+    } else if (kind === 'deny') {
+      this.denyBtn = button;
+      button.addEventListener('click', () => this.handleDeny());
+    } else {
+      this.cancelBtn = button;
+      button.addEventListener('click', () => this.dismissWith('cancel'));
+    }
+
+    return button;
+  }
+
+  private getActionsContainer(): HTMLElement | null {
+    return this.popup?.querySelector<HTMLElement>('.cspa-actions') || null;
+  }
+
+  private ensureActionsContainer(): HTMLElement {
+    let actions = this.getActionsContainer();
+    if (actions) return actions;
+
+    actions = createElement('div', 'cspa-actions');
+    if (this.options.reverseButtons) addClasses(actions, 'cspa-actions-reverse');
+    if (this.options.customClass?.actions) addClasses(actions, this.options.customClass.actions);
+    this.popup!.appendChild(actions);
+    return actions;
+  }
+
+  private focusAfterButtonRemoval(removed: HTMLButtonElement): void {
+    if (typeof document === 'undefined' || document.activeElement !== removed || !this.popup) return;
+
+    const candidate = this.confirmBtn || this.denyBtn || this.cancelBtn || this.renderedInput?.inputElement;
+    if (candidate && candidate !== removed && !('disabled' in candidate && (candidate as HTMLButtonElement).disabled)) {
+      (candidate as HTMLElement).focus();
+      return;
+    }
+    this.popup.focus();
+  }
+
+  private removeActionButton(kind: 'confirm' | 'deny' | 'cancel'): void {
+    const button = kind === 'confirm' ? this.confirmBtn : kind === 'deny' ? this.denyBtn : this.cancelBtn;
+    if (!button) return;
+    const wasFocused = typeof document !== 'undefined' && document.activeElement === button;
+
+    if (kind === 'confirm') this.confirmBtn = null;
+    else if (kind === 'deny') this.denyBtn = null;
+    else this.cancelBtn = null;
+
+    removeElement(button);
+    if (wasFocused) this.focusAfterButtonRemoval(button);
+  }
+
+  private updateActionButtons(): void {
+    const desired = {
+      confirm: this.options.showConfirmButton !== false,
+      deny: Boolean(this.options.showDenyButton),
+      cancel: Boolean(this.options.showCancelButton),
+    };
+
+    for (const kind of ['confirm', 'deny', 'cancel'] as const) {
+      const button = kind === 'confirm' ? this.confirmBtn : kind === 'deny' ? this.denyBtn : this.cancelBtn;
+      if (desired[kind] && !button) {
+        this.ensureActionsContainer().appendChild(this.createActionButton(kind));
+      } else if (!desired[kind] && button) {
+        this.removeActionButton(kind);
+      }
+    }
+
+    const actions = this.getActionsContainer();
+    if (actions && !this.confirmBtn && !this.denyBtn && !this.cancelBtn) {
+      removeElement(actions);
+    }
+  }
+
+  private getCustomClassTarget(key: keyof CspAlertCustomClass): Element | null {
+    if (key === 'container') return this.container;
+    if (key === 'popup') return this.popup;
+    if (key === 'title') return this.getTitle();
+    if (key === 'closeButton') return this.closeBtn;
+    if (key === 'icon') return this.getIcon();
+    if (key === 'image') return this.getImage();
+    if (key === 'htmlContainer') return this.getHtmlContainer();
+    if (key === 'input') return this.renderedInput?.inputElement || null;
+    if (key === 'inputLabel') return this.popup?.querySelector('.cspa-input-label') || null;
+    if (key === 'validationMessage') return this.renderedInput?.validationMessageEl || this.validationMessageEl;
+    if (key === 'actions') return this.getActionsContainer();
+    if (key === 'confirmButton') return this.confirmBtn;
+    if (key === 'denyButton') return this.denyBtn;
+    if (key === 'cancelButton') return this.cancelBtn;
+    if (key === 'loader') return this.popup?.querySelector('.cspa-loader') || null;
+    if (key === 'footer') return this.getFooter();
+    if (key === 'timerProgressBar') return this.timerProgressBar;
+    return null;
+  }
+
+  private updateCustomClasses(previous: Partial<CspAlertCustomClass>, next: Partial<CspAlertCustomClass>): void {
+    const keys = Object.keys({ ...previous, ...next }) as Array<keyof CspAlertCustomClass>;
+    for (const key of keys) {
+      const target = this.getCustomClassTarget(key);
+      if (!target) continue;
+      if (previous[key] && previous[key] !== next[key]) {
+        removeClasses(target, previous[key]!);
+      }
+      if (next[key]) addClasses(target, next[key]!);
+    }
+    this.appliedCustomClasses = { ...next };
+  }
+
   public update(options: CspAlertUpdateOptions): void {
     if (this.isSettled || this.isDestroyed || !this.popup) return;
 
-    // Title update
+    const previousCustomClasses = { ...(this.appliedCustomClasses || {}) };
+
+    // Update supported DOM content first.
     if ('title' in options || 'titleText' in options) {
       const newTitle = options.titleText !== undefined ? options.titleText : options.title;
       let titleEl = this.getTitle();
@@ -687,7 +844,6 @@ export class CspAlertInstance {
       }
     }
 
-    // Text / HTML update
     if ('text' in options || 'html' in options) {
       const newHtml = options.html;
       const newText = options.text;
@@ -712,9 +868,7 @@ export class CspAlertInstance {
               if (sanitizer) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(sanitizer(newHtml), 'text/html');
-                while (doc.body.firstChild) {
-                  htmlEl.appendChild(doc.body.firstChild);
-                }
+                while (doc.body.firstChild) htmlEl.appendChild(doc.body.firstChild);
               } else {
                 htmlEl.textContent = newHtml;
               }
@@ -729,52 +883,49 @@ export class CspAlertInstance {
       }
     }
 
-    // Button text updates (preserving loader state)
-    if ('confirmButtonText' in options && this.confirmBtn) {
-      const text = options.confirmButtonText || '';
-      if (this.loadingState) {
-        const loader = this.confirmBtn.querySelector('.cspa-loader');
-        this.confirmBtn.textContent = text;
-        if (loader) {
-          this.confirmBtn.insertBefore(loader, this.confirmBtn.firstChild);
-        }
-      } else {
-        this.confirmBtn.textContent = text;
-      }
-    }
-
-    if ('denyButtonText' in options && this.denyBtn) {
-      this.denyBtn.textContent = options.denyButtonText || '';
-    }
-
-    if ('cancelButtonText' in options && this.cancelBtn) {
-      this.cancelBtn.textContent = options.cancelButtonText || '';
-    }
-
-    // Filter only supported update keys into active instance options
-    const ALLOWED_UPDATE_KEYS: Array<keyof CspAlertUpdateOptions> = [
-      'title',
-      'titleText',
-      'text',
-      'html',
-      'showConfirmButton',
-      'showDenyButton',
-      'showCancelButton',
-      'confirmButtonText',
-      'denyButtonText',
-      'cancelButtonText',
-      'customClass',
-      'didRender',
-    ];
-
     const safeUpdates: Partial<CspAlertUpdateOptions> = {};
-    for (const key of ALLOWED_UPDATE_KEYS) {
+    const allowedKeys: Array<keyof CspAlertUpdateOptions> = [
+      'title', 'titleText', 'text', 'html',
+      'showConfirmButton', 'showDenyButton', 'showCancelButton',
+      'confirmButtonText', 'denyButtonText', 'cancelButtonText',
+      'didRender'
+    ];
+    for (const key of allowedKeys) {
       if (key in options && (options as any)[key] !== undefined) {
         (safeUpdates as any)[key] = (options as any)[key];
       }
     }
 
     this.options = safeMerge({}, this.options, safeUpdates);
+
+    if ('customClass' in options && options.customClass) {
+      const nextCustomClasses = { ...previousCustomClasses, ...options.customClass };
+      this.options.customClass = nextCustomClasses;
+      this.updateCustomClasses(previousCustomClasses, nextCustomClasses);
+    }
+
+    // Labels and dynamic visibility are applied after options are merged.
+    if ('confirmButtonText' in options && this.confirmBtn) {
+      const text = options.confirmButtonText || '';
+      const loader = this.confirmBtn.querySelector('.cspa-loader');
+      this.confirmBtn.textContent = text;
+      if (loader) this.confirmBtn.insertBefore(loader, this.confirmBtn.firstChild);
+    }
+    if ('denyButtonText' in options && this.denyBtn) this.denyBtn.textContent = options.denyButtonText || '';
+    if ('cancelButtonText' in options && this.cancelBtn) this.cancelBtn.textContent = options.cancelButtonText || '';
+
+    this.updateActionButtons();
+
+    // Re-apply caller classes after creating/removing dynamic elements.
+    if ('customClass' in options) {
+      this.updateCustomClasses(previousCustomClasses, this.options.customClass || {});
+    }
+
+    // A loader may have been created before a customClass update.
+    const loader = this.popup.querySelector('.cspa-loader');
+    if (loader && this.options.customClass?.loader) {
+      addClasses(loader, this.options.customClass.loader);
+    }
 
     if (this.options.didRender && this.popup) {
       try {
@@ -880,11 +1031,13 @@ export class CspAlertInstance {
       this.container = null;
     }
 
-    // Restore body scroll lock only if no other modal popups remain
+    // Restore global classes only if no other modal popups remain.
     if (typeof document !== 'undefined') {
       const remainingPopups = document.querySelectorAll('.cspa-container:not(.cspa-toast-container)');
       if (remainingPopups.length === 0) {
         document.body.classList.remove('cspa-body-scroll-lock');
+        document.documentElement.classList.remove('cspa-height-auto');
+        document.body.classList.remove('cspa-height-auto');
       }
     }
 
